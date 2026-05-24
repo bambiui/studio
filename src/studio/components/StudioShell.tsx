@@ -1,24 +1,50 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   componentCategories,
   studioComponents,
   type ComponentCategory,
   type StudioComponentDefinition,
 } from "../registry/components";
+import {
+  serializeThemeAsCss,
+  serializeThemeAsJson,
+  serializeThemeAsPreset,
+} from "../theme/exporters";
 import { createThemeFromBaseColor, isValidHexColor } from "../theme/generator";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import { tokenDefinitionMap } from "../tokens/metadata";
 
 type StudioStyle = CSSProperties & Record<`--${string}`, string>;
+type ExportFormat = "css" | "json" | "preset";
+
+const STORAGE_KEY = "bambiui-studio-theme";
 
 export function StudioShell() {
   const [selectedComponentId, setSelectedComponentId] = useState(
     studioComponents[0]?.id ?? "",
   );
   const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedTheme = window.localStorage.getItem(STORAGE_KEY);
+      if (storedTheme) {
+        setTokenOverrides(JSON.parse(storedTheme) as TokenOverrides);
+      }
+    } finally {
+      setHasLoadedStorage(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStorage) return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tokenOverrides));
+  }, [hasLoadedStorage, tokenOverrides]);
 
   const selectedComponent = useMemo(
     () =>
@@ -64,7 +90,10 @@ export function StudioShell() {
         onSelectComponent={setSelectedComponentId}
       />
       <main className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
+        <TopBar
+          tokenCount={Object.keys(tokenOverrides).length}
+          onOpenExport={() => setIsExportOpen(true)}
+        />
         <Canvas
           selectedComponentId={selectedComponent?.id ?? ""}
           onSelectComponent={setSelectedComponentId}
@@ -78,11 +107,21 @@ export function StudioShell() {
         onResetTokens={resetTokens}
         onApplyGeneratedTheme={applyGeneratedTheme}
       />
+      <ExportDialog
+        isOpen={isExportOpen}
+        tokens={tokenOverrides}
+        onClose={() => setIsExportOpen(false)}
+      />
     </div>
   );
 }
 
-function TopBar() {
+interface TopBarProps {
+  tokenCount: number;
+  onOpenExport: () => void;
+}
+
+function TopBar({ tokenCount, onOpenExport }: TopBarProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#11172a]/95 px-6 backdrop-blur">
       <div>
@@ -93,10 +132,14 @@ function TopBar() {
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-300">
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-          Canvas MVP
+          {tokenCount} override
         </span>
-        <button className="rounded-full bg-violet-500 px-4 py-2 font-medium text-white shadow-lg shadow-violet-950/40 transition hover:bg-violet-400">
-          Export soon
+        <button
+          type="button"
+          onClick={onOpenExport}
+          className="rounded-full bg-violet-500 px-4 py-2 font-medium text-white shadow-lg shadow-violet-950/40 transition hover:bg-violet-400"
+        >
+          Export
         </button>
       </div>
     </header>
@@ -397,5 +440,110 @@ function InspectorPanel({
         </div>
       </section>
     </aside>
+  );
+}
+
+interface ExportDialogProps {
+  isOpen: boolean;
+  tokens: TokenOverrides;
+  onClose: () => void;
+}
+
+function ExportDialog({ isOpen, tokens, onClose }: ExportDialogProps) {
+  const [format, setFormat] = useState<ExportFormat>("css");
+  const [copyState, setCopyState] = useState("Copy");
+  const serializedTheme = useMemo(() => {
+    if (format === "json") return serializeThemeAsJson(tokens);
+    if (format === "preset") return serializeThemeAsPreset(tokens);
+    return serializeThemeAsCss(tokens);
+  }, [format, tokens]);
+
+  if (!isOpen) return null;
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(serializedTheme);
+    setCopyState("Copied");
+    window.setTimeout(() => setCopyState("Copy"), 1200);
+  };
+
+  const downloadTheme = () => {
+    const extension = format === "css" ? "css" : "json";
+    const file = new Blob([serializedTheme], { type: "text/plain" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `bambiui-studio-theme.${extension}`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
+      <section className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded-3xl border border-white/10 bg-[#080d1a] shadow-2xl shadow-black/40">
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.24em] text-violet-300">
+              Export
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-white">
+              Theme output
+            </h2>
+            <p className="mt-2 text-sm text-slate-400">
+              Override edilen tokenları CSS, JSON veya BambiUI preset taslağı
+              olarak al.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/10 px-3 py-1 text-sm text-slate-300 transition hover:bg-white/10"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 p-5">
+          {(["css", "json", "preset"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setFormat(option)}
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                format === option
+                  ? "border-violet-400 bg-violet-500/20 text-white"
+                  : "border-white/10 text-slate-300 hover:bg-white/10"
+              }`}
+            >
+              {option.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
+        <div className="min-h-0 flex-1 px-5 pb-5">
+          <textarea
+            readOnly
+            value={serializedTheme}
+            className="h-80 w-full resize-none rounded-2xl border border-white/10 bg-[#050814] p-4 font-mono text-xs leading-5 text-slate-100 outline-none"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-white/10 p-5">
+          <button
+            type="button"
+            onClick={copyToClipboard}
+            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+          >
+            {copyState}
+          </button>
+          <button
+            type="button"
+            onClick={downloadTheme}
+            className="rounded-full bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400"
+          >
+            Download
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
