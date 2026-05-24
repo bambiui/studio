@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import {
   componentCategories,
@@ -7,17 +8,46 @@ import {
   type ComponentCategory,
   type StudioComponentDefinition,
 } from "../registry/components";
+import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import { tokenDefinitionMap } from "../tokens/metadata";
 
+type StudioStyle = CSSProperties & Record<`--${string}`, string>;
+
 export function StudioShell() {
-  const [selectedComponentId, setSelectedComponentId] = useState(studioComponents[0]?.id ?? "");
+  const [selectedComponentId, setSelectedComponentId] = useState(
+    studioComponents[0]?.id ?? "",
+  );
+  const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
 
   const selectedComponent = useMemo(
     () =>
-      studioComponents.find((component) => component.id === selectedComponentId) ??
-      studioComponents[0],
+      studioComponents.find(
+        (component) => component.id === selectedComponentId,
+      ) ?? studioComponents[0],
     [selectedComponentId],
   );
+
+  const previewStyle = useMemo(
+    () => tokenOverrides as StudioStyle,
+    [tokenOverrides],
+  );
+
+  const updateToken = (tokenId: string, value: string) => {
+    setTokenOverrides((current) => {
+      if (!value.trim()) {
+        const next = { ...current };
+        delete next[tokenId];
+        return next;
+      }
+
+      return {
+        ...current,
+        [tokenId]: value,
+      };
+    });
+  };
+
+  const resetTokens = () => setTokenOverrides({});
 
   return (
     <div className="flex min-h-screen bg-[#0b1020] text-slate-100">
@@ -30,9 +60,15 @@ export function StudioShell() {
         <Canvas
           selectedComponentId={selectedComponent?.id ?? ""}
           onSelectComponent={setSelectedComponentId}
+          previewStyle={previewStyle}
         />
       </main>
-      <InspectorPanel selectedComponent={selectedComponent} />
+      <InspectorPanel
+        selectedComponent={selectedComponent}
+        tokenOverrides={tokenOverrides}
+        onUpdateToken={updateToken}
+        onResetTokens={resetTokens}
+      />
     </div>
   );
 }
@@ -126,7 +162,9 @@ function ComponentCategoryGroup({
                   : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]"
               }`}
             >
-              <span className="block text-sm font-medium">{component.name}</span>
+              <span className="block text-sm font-medium">
+                {component.name}
+              </span>
               <span className="mt-1 block text-xs leading-5 text-slate-500">
                 {component.tokenIds.length} editable token
               </span>
@@ -141,16 +179,23 @@ function ComponentCategoryGroup({
 interface CanvasProps {
   selectedComponentId: string;
   onSelectComponent: (componentId: string) => void;
+  previewStyle: StudioStyle;
 }
 
-function Canvas({ selectedComponentId, onSelectComponent }: CanvasProps) {
+function Canvas({
+  selectedComponentId,
+  onSelectComponent,
+  previewStyle,
+}: CanvasProps) {
   return (
     <section className="min-h-0 flex-1 overflow-auto p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
           <p className="text-sm font-medium text-violet-200">Free canvas</p>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-            İlk fazda canvas, seçilebilir component showcase olarak çalışıyor. Sonraki fazlarda drag/drop, zoom ve layout editing bu katmanın üzerine eklenecek.
+            İlk fazda canvas, seçilebilir component showcase olarak çalışıyor.
+            Sonraki fazlarda drag/drop, zoom ve layout editing bu katmanın
+            üzerine eklenecek.
           </p>
         </div>
 
@@ -161,6 +206,7 @@ function Canvas({ selectedComponentId, onSelectComponent }: CanvasProps) {
               component={component}
               isSelected={component.id === selectedComponentId}
               onSelect={() => onSelectComponent(component.id)}
+              previewStyle={previewStyle}
             />
           ))}
         </div>
@@ -173,9 +219,15 @@ interface CanvasCardProps {
   component: StudioComponentDefinition;
   isSelected: boolean;
   onSelect: () => void;
+  previewStyle: StudioStyle;
 }
 
-function CanvasCard({ component, isSelected, onSelect }: CanvasCardProps) {
+function CanvasCard({
+  component,
+  isSelected,
+  onSelect,
+  previewStyle,
+}: CanvasCardProps) {
   return (
     <article
       className={`rounded-3xl border p-2 transition ${
@@ -191,7 +243,9 @@ function CanvasCard({ component, isSelected, onSelect }: CanvasCardProps) {
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-white">{component.name}</h3>
+            <h3 className="text-base font-semibold text-white">
+              {component.name}
+            </h3>
             <p className="mt-1 text-sm leading-6 text-slate-400">
               {component.description}
             </p>
@@ -203,7 +257,10 @@ function CanvasCard({ component, isSelected, onSelect }: CanvasCardProps) {
           ) : null}
         </div>
       </button>
-      <div className="bambi-preview rounded-[1.25rem] border border-slate-200 bg-[var(--bambi-background)] p-6 text-[var(--bambi-foreground)]">
+      <div
+        className="bambi-preview rounded-[1.25rem] border border-slate-200 bg-[var(--bambi-background)] p-6 text-[var(--bambi-foreground)]"
+        style={previewStyle}
+      >
         {component.preview}
       </div>
     </article>
@@ -212,9 +269,17 @@ function CanvasCard({ component, isSelected, onSelect }: CanvasCardProps) {
 
 interface InspectorPanelProps {
   selectedComponent?: StudioComponentDefinition;
+  tokenOverrides: TokenOverrides;
+  onUpdateToken: (tokenId: string, value: string) => void;
+  onResetTokens: () => void;
 }
 
-function InspectorPanel({ selectedComponent }: InspectorPanelProps) {
+function InspectorPanel({
+  selectedComponent,
+  tokenOverrides,
+  onUpdateToken,
+  onResetTokens,
+}: InspectorPanelProps) {
   return (
     <aside className="hidden w-80 shrink-0 border-l border-white/10 bg-[#080d1a] p-5 xl:block">
       <div className="mb-6">
@@ -225,14 +290,25 @@ function InspectorPanel({ selectedComponent }: InspectorPanelProps) {
           {selectedComponent?.name ?? "No component"}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          {selectedComponent?.description ?? "Canvas üzerinden bir komponent seç."}
+          {selectedComponent?.description ??
+            "Canvas üzerinden bir komponent seç."}
         </p>
       </div>
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
-        <h3 className="text-sm font-semibold text-white">Token map</h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold text-white">Token editor</h3>
+          <button
+            type="button"
+            onClick={onResetTokens}
+            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
+          >
+            Reset
+          </button>
+        </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Bu liste sonraki fazda canlı token editor alanına dönüşecek.
+          Token değerlerini düzenle; değişiklikler canvas preview alanına anında
+          uygulanır.
         </p>
         <div className="mt-4 space-y-3">
           {selectedComponent?.tokenIds.map((tokenId) => {
@@ -254,6 +330,19 @@ function InspectorPanel({ selectedComponent }: InspectorPanelProps) {
                 <code className="mt-2 block break-all text-xs text-violet-200">
                   {tokenId}
                 </code>
+                <label className="mt-3 block">
+                  <span className="mb-1 block text-xs font-medium text-slate-400">
+                    Value
+                  </span>
+                  <input
+                    value={tokenOverrides[tokenId] ?? ""}
+                    onChange={(event) =>
+                      onUpdateToken(tokenId, event.target.value)
+                    }
+                    placeholder={editableTokenDefaults[tokenId] ?? "CSS value"}
+                    className="w-full rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+                  />
+                </label>
                 {token?.description ? (
                   <p className="mt-2 text-xs leading-5 text-slate-500">
                     {token.description}

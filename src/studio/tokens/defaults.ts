@@ -1,0 +1,28 @@
+export type TokenOverrides = Record<string, string>;
+
+export const editableTokenDefaults: TokenOverrides = {
+  "--bambi-primary": "oklch(55% 0.22 271)",
+  "--bambi-primary-foreground": "oklch(100% 0 0)",
+  "--bambi-secondary": "oklch(95% 0.008 271)",
+  "--bambi-danger": "oklch(65% 0.233 28)",
+  "--bambi-success": "oklch(73% 0.194 153)",
+  "--bambi-warning": "oklch(78% 0.159 74)",
+  "--bambi-card": "oklch(100% 0 0)",
+  "--bambi-card-foreground": "oklch(9% 0 0)",
+  "--bambi-border": "oklch(90% 0.01 271)",
+  "--bambi-ring": "var(--bambi-primary)",
+  "--bambi-muted": "oklch(95% 0.008 271)",
+  "--bambi-input": "oklch(90% 0.01 271)",
+  "--bambi-input-background": "oklch(100% 0 0)",
+  "--bambi-input-foreground": "oklch(9% 0 0)",
+  "--bambi-input-placeholder": "oklch(55% 0.021 271)",
+  "--bambi-intent-primary-bg": "var(--bambi-primary)",
+  "--bambi-intent-primary-fg": "var(--bambi-primary-foreground)",
+  "--bambi-intent-primary-hover-bg": "oklch(49% 0.23 271)",
+  "--bambi-radius-sm": "0.375rem",
+  "--bambi-radius-md": "0.5rem",
+  "--bambi-radius-lg": "0.75rem",
+  "--bambi-radius-full": "9999px",
+  "--bambi-shadow-sm": "0 1px 2px 0 oklch(0% 0 0 / 0.05)",
+  "--bambi-state-disabled-opacity": "0.5",
+};
