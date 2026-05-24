@@ -158,6 +158,8 @@ export function StudioShell() {
       <ExportDialog
         isOpen={isExportOpen}
         tokens={tokenOverrides}
+        previewTokens={PREVIEW_SCHEMES[previewScheme]}
+        previewScheme={previewScheme}
         onClose={() => setIsExportOpen(false)}
       />
     </div>

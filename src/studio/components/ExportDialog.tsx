@@ -5,22 +5,35 @@ import {
   serializeThemeAsPreset,
 } from "../theme/exporters";
 import type { TokenOverrides } from "../tokens/defaults";
-import type { ExportFormat } from "../types";
+import type { ExportFormat, PreviewScheme } from "../types";
 
 interface ExportDialogProps {
   isOpen: boolean;
   tokens: TokenOverrides;
+  previewTokens: TokenOverrides;
+  previewScheme: PreviewScheme;
   onClose: () => void;
 }
 
-export function ExportDialog({ isOpen, tokens, onClose }: ExportDialogProps) {
+export function ExportDialog({
+  isOpen,
+  tokens,
+  previewTokens,
+  previewScheme,
+  onClose,
+}: ExportDialogProps) {
   const [format, setFormat] = useState<ExportFormat>("css");
   const [copyState, setCopyState] = useState("Copy");
+  const [includePreviewTokens, setIncludePreviewTokens] = useState(false);
+  const exportTokens = useMemo(
+    () => (includePreviewTokens ? { ...previewTokens, ...tokens } : tokens),
+    [includePreviewTokens, previewTokens, tokens],
+  );
   const serializedTheme = useMemo(() => {
-    if (format === "json") return serializeThemeAsJson(tokens);
-    if (format === "preset") return serializeThemeAsPreset(tokens);
-    return serializeThemeAsCss(tokens);
-  }, [format, tokens]);
+    if (format === "json") return serializeThemeAsJson(exportTokens);
+    if (format === "preset") return serializeThemeAsPreset(exportTokens);
+    return serializeThemeAsCss(exportTokens);
+  }, [exportTokens, format]);
 
   if (!isOpen) return null;
 
@@ -66,21 +79,34 @@ export function ExportDialog({ isOpen, tokens, onClose }: ExportDialogProps) {
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 p-5">
-          {(["css", "json", "preset"] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setFormat(option)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                format === option
-                  ? "border-violet-400 bg-violet-500/20 text-white"
-                  : "border-white/10 text-slate-300 hover:bg-white/10"
-              }`}
-            >
-              {option.toUpperCase()}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div className="flex flex-wrap gap-2">
+            {(["css", "json", "preset"] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setFormat(option)}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  format === option
+                    ? "border-violet-400 bg-violet-500/20 text-white"
+                    : "border-white/10 text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                {option.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            <input
+              type="checkbox"
+              checked={includePreviewTokens}
+              onChange={(event) =>
+                setIncludePreviewTokens(event.target.checked)
+              }
+              className="accent-violet-500"
+            />
+            Include {previewScheme} preview tokens
+          </label>
         </div>
 
         <div className="min-h-0 flex-1 px-5 pb-5">
