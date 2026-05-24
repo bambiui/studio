@@ -1,4 +1,5 @@
-import { useState } from "react";
+import type { PointerEvent, RefObject } from "react";
+import { useRef, useState } from "react";
 import {
   studioComponents,
   type StudioComponentDefinition,
@@ -11,18 +12,70 @@ interface CanvasProps {
   previewStyle: StudioStyle;
 }
 
+interface CanvasItem {
+  id: string;
+  componentId: string;
+  x: number;
+  y: number;
+}
+
+interface ActiveDrag {
+  itemId: string;
+  offsetX: number;
+  offsetY: number;
+}
+
 export function Canvas({
   selectedComponentId,
   onSelectComponent,
   previewStyle,
 }: CanvasProps) {
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [canvasMode, setCanvasMode] = useState<"showcase" | "board">(
+    "showcase",
+  );
   const [viewMode, setViewMode] = useState<"all" | "selected">("all");
+  const [items, setItems] = useState<CanvasItem[]>([]);
+  const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const visibleComponents =
     viewMode === "selected"
       ? studioComponents.filter(
           (component) => component.id === selectedComponentId,
         )
       : studioComponents;
+
+  const addSelectedToBoard = () => {
+    setCanvasMode("board");
+    setItems((current) => [
+      ...current,
+      {
+        id: `item-${Date.now()}`,
+        componentId: selectedComponentId,
+        x: 32 + current.length * 24,
+        y: 32 + current.length * 24,
+      },
+    ]);
+  };
+
+  const moveItem = (itemId: string, x: number, y: number) => {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId
+          ? { ...item, x: Math.max(0, x), y: Math.max(0, y) }
+          : item,
+      ),
+    );
+  };
+
+  const handleBoardPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!activeDrag || !boardRef.current) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    moveItem(
+      activeDrag.itemId,
+      event.clientX - rect.left - activeDrag.offsetX,
+      event.clientY - rect.top - activeDrag.offsetY,
+    );
+  };
 
   return (
     <section className="min-h-0 flex-1 overflow-auto p-6">
@@ -53,38 +106,196 @@ export function Canvas({
                 </select>
               </label>
               <div className="flex rounded-full border border-white/10 bg-black/20 p-1">
-                {(["all", "selected"] as const).map((mode) => (
+                {(["showcase", "board"] as const).map((mode) => (
                   <button
                     key={mode}
                     type="button"
-                    onClick={() => setViewMode(mode)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                      viewMode === mode
+                    onClick={() => setCanvasMode(mode)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition ${
+                      canvasMode === mode
                         ? "bg-violet-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
-                    {mode === "all" ? "All" : "Selected"}
+                    {mode}
                   </button>
                 ))}
               </div>
+              {canvasMode === "showcase" ? (
+                <div className="flex rounded-full border border-white/10 bg-black/20 p-1">
+                  {(["all", "selected"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setViewMode(mode)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                        viewMode === mode
+                          ? "bg-violet-500 text-white"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {mode === "all" ? "All" : "Selected"}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={addSelectedToBoard}
+                className="rounded-full bg-violet-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-400"
+              >
+                Add selected
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-2">
-          {visibleComponents.map((component) => (
-            <CanvasCard
-              key={component.id}
-              component={component}
-              isSelected={component.id === selectedComponentId}
-              onSelect={() => onSelectComponent(component.id)}
-              previewStyle={previewStyle}
-            />
-          ))}
-        </div>
+        {canvasMode === "showcase" ? (
+          <div className="grid gap-5 xl:grid-cols-2">
+            {visibleComponents.map((component) => (
+              <CanvasCard
+                key={component.id}
+                component={component}
+                isSelected={component.id === selectedComponentId}
+                onSelect={() => onSelectComponent(component.id)}
+                previewStyle={previewStyle}
+              />
+            ))}
+          </div>
+        ) : (
+          <CanvasBoard
+            boardRef={boardRef}
+            items={items}
+            selectedComponentId={selectedComponentId}
+            previewStyle={previewStyle}
+            onSelectComponent={onSelectComponent}
+            onClear={() => setItems([])}
+            onRemove={(itemId) =>
+              setItems((current) =>
+                current.filter((item) => item.id !== itemId),
+              )
+            }
+            onPointerMove={handleBoardPointerMove}
+            onPointerUp={() => setActiveDrag(null)}
+            onStartDrag={(itemId, offsetX, offsetY) =>
+              setActiveDrag({ itemId, offsetX, offsetY })
+            }
+          />
+        )}
       </div>
     </section>
+  );
+}
+
+interface CanvasBoardProps {
+  boardRef: RefObject<HTMLDivElement | null>;
+  items: CanvasItem[];
+  selectedComponentId: string;
+  previewStyle: StudioStyle;
+  onSelectComponent: (componentId: string) => void;
+  onClear: () => void;
+  onRemove: (itemId: string) => void;
+  onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerUp: () => void;
+  onStartDrag: (itemId: string, offsetX: number, offsetY: number) => void;
+}
+
+function CanvasBoard({
+  boardRef,
+  items,
+  selectedComponentId,
+  previewStyle,
+  onSelectComponent,
+  onClear,
+  onRemove,
+  onPointerMove,
+  onPointerUp,
+  onStartDrag,
+}: CanvasBoardProps) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2">
+        <div>
+          <h3 className="text-sm font-semibold text-white">Board canvas</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Add selected components, then drag each item by its handle.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClear}
+          className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+        >
+          Clear board
+        </button>
+      </div>
+      <div
+        ref={boardRef}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+        className="relative min-h-[34rem] overflow-hidden rounded-[1.25rem] border border-dashed border-white/15 bg-[#050814] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:32px_32px]"
+      >
+        {items.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-slate-500">
+            Select a component and click Add selected to place it on the board.
+          </div>
+        ) : null}
+        {items.map((item) => {
+          const component = studioComponents.find(
+            (candidate) => candidate.id === item.componentId,
+          );
+          if (!component) return null;
+          const isSelected = item.componentId === selectedComponentId;
+
+          return (
+            <div
+              key={item.id}
+              className={`absolute w-[min(24rem,calc(100%-2rem))] rounded-2xl border bg-[#080d1a] p-2 shadow-2xl shadow-black/30 ${
+                isSelected ? "border-violet-400" : "border-white/10"
+              }`}
+              style={{ transform: `translate(${item.x}px, ${item.y}px)` }}
+            >
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectComponent(component.id)}
+                onPointerDown={(event) => {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  onSelectComponent(component.id);
+                  onStartDrag(
+                    item.id,
+                    event.nativeEvent.offsetX,
+                    event.nativeEvent.offsetY,
+                  );
+                }}
+                className="mb-2 flex cursor-grab items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2 text-left active:cursor-grabbing"
+              >
+                <span className="text-xs font-semibold text-white">
+                  {component.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRemove(item.id);
+                  }}
+                  className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                >
+                  Remove
+                </button>
+              </div>
+              <div
+                className="rounded-xl border border-slate-200 bg-[var(--bambi-background)] p-4 text-[var(--bambi-foreground)]"
+                style={previewStyle}
+              >
+                {component.preview}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
