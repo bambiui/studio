@@ -38,6 +38,7 @@ export function Canvas({
   );
   const [viewMode, setViewMode] = useState<"all" | "selected">("all");
   const [zoom, setZoom] = useState(1);
+  const [snapToGrid, setSnapToGrid] = useState(false);
   const [items, setItems] = useState<CanvasItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [hasLoadedItems, setHasLoadedItems] = useState(false);
@@ -88,7 +89,9 @@ export function Canvas({
   };
 
   const moveItem = (itemId: string, x: number, y: number) => {
-    updateItem(itemId, { x: Math.max(0, x), y: Math.max(0, y) });
+    const nextX = snapToGrid ? snapValue(x, 32) : x;
+    const nextY = snapToGrid ? snapValue(y, 32) : y;
+    updateItem(itemId, { x: Math.max(0, nextX), y: Math.max(0, nextY) });
   };
 
   const handleBoardPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -193,7 +196,9 @@ export function Canvas({
             selectedItemId={selectedItemId}
             previewStyle={previewStyle}
             zoom={zoom}
+            snapToGrid={snapToGrid}
             onZoomChange={setZoom}
+            onSnapToGridChange={setSnapToGrid}
             onSelectItem={(itemId, componentId) => {
               setSelectedItemId(itemId);
               onSelectComponent(componentId);
@@ -237,6 +242,10 @@ export function Canvas({
   );
 }
 
+function snapValue(value: number, gridSize: number): number {
+  return Math.round(value / gridSize) * gridSize;
+}
+
 function duplicateItem(items: CanvasItem[], itemId: string): CanvasItem[] {
   const item = items.find((candidate) => candidate.id === itemId);
   if (!item) return items;
@@ -276,7 +285,9 @@ interface CanvasBoardProps {
   selectedItemId: string | null;
   previewStyle: StudioStyle;
   zoom: number;
+  snapToGrid: boolean;
   onZoomChange: (zoom: number) => void;
+  onSnapToGridChange: (enabled: boolean) => void;
   onSelectItem: (itemId: string, componentId: string) => void;
   onClear: () => void;
   onImportItems: (items: CanvasItem[]) => void;
@@ -296,7 +307,9 @@ function CanvasBoard({
   selectedItemId,
   previewStyle,
   zoom,
+  snapToGrid,
   onZoomChange,
+  onSnapToGridChange,
   onSelectItem,
   onClear,
   onImportItems,
@@ -381,6 +394,15 @@ function CanvasBoard({
           >
             100%
           </button>
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            <input
+              type="checkbox"
+              checked={snapToGrid}
+              onChange={(event) => onSnapToGridChange(event.target.checked)}
+              className="accent-violet-500"
+            />
+            Snap 32px
+          </label>
           <label className="flex items-center gap-2 text-xs text-slate-400">
             Width
             <input
