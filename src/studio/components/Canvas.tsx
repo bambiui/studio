@@ -205,6 +205,7 @@ export function Canvas({
               if (nextItems[0]) onSelectComponent(nextItems[0].componentId);
             }}
             onResize={(itemId, width) => updateItem(itemId, { width })}
+            onMove={(itemId, x, y) => moveItem(itemId, x, y)}
             onDuplicate={(itemId) => {
               setItems((current) => duplicateItem(current, itemId));
               const duplicated = items.find((item) => item.id === itemId);
@@ -275,6 +276,7 @@ interface CanvasBoardProps {
   onClear: () => void;
   onImportItems: (items: CanvasItem[]) => void;
   onResize: (itemId: string, width: number) => void;
+  onMove: (itemId: string, x: number, y: number) => void;
   onDuplicate: (itemId: string) => void;
   onReorder: (itemId: string, direction: "forward" | "backward") => void;
   onRemove: (itemId: string) => void;
@@ -292,6 +294,7 @@ function CanvasBoard({
   onClear,
   onImportItems,
   onResize,
+  onMove,
   onDuplicate,
   onReorder,
   onRemove,
@@ -345,7 +348,8 @@ function CanvasBoard({
         <div>
           <h3 className="text-sm font-semibold text-white">Board canvas</h3>
           <p className="mt-1 text-xs text-slate-500">
-            Add selected components, then drag each item by its handle.
+            Drag handles or use arrow keys to move selected items. Hold Shift
+            for larger steps.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -495,6 +499,28 @@ function CanvasBoard({
                 role="button"
                 tabIndex={0}
                 onClick={() => onSelectItem(item.id, component.id)}
+                onKeyDown={(event) => {
+                  const step = event.shiftKey ? 24 : 8;
+                  if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    onMove(item.id, item.x + step, item.y);
+                  } else if (event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    onMove(item.id, item.x - step, item.y);
+                  } else if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    onMove(item.id, item.x, item.y + step);
+                  } else if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    onMove(item.id, item.x, item.y - step);
+                  } else if (
+                    event.key === "Delete" ||
+                    event.key === "Backspace"
+                  ) {
+                    event.preventDefault();
+                    onRemove(item.id);
+                  }
+                }}
                 onPointerDown={(event) => {
                   event.currentTarget.setPointerCapture(event.pointerId);
                   onSelectItem(item.id, component.id);
