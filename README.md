@@ -10,6 +10,7 @@ The current MVP lets you preview BambiUI components, override design tokens, gen
 - Selectable component canvas
 - Draggable board canvas with persisted item positions
 - Board item resize, duplicate and layer controls
+- Board zoom and snap-to-grid controls
 - Board layout import/export
 - Keyboard movement for board items
 - All/selected canvas view modes
@@ -20,7 +21,7 @@ The current MVP lets you preview BambiUI components, override design tokens, gen
 - Light and dark theme generation from a single base color
 - Built-in theme color presets
 - Contrast report
-- CSS, JSON and BambiUI preset export
+- CSS, JSON and BambiUI preset export with token summary
 - CSS/JSON/preset import
 - Local storage persistence
 
