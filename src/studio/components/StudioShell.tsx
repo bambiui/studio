@@ -155,6 +155,8 @@ function ComponentExplorer({
   selectedComponentId,
   onSelectComponent,
 }: ComponentExplorerProps) {
+  const [query, setQuery] = useState("");
+
   return (
     <aside className="hidden w-72 shrink-0 border-r border-white/10 bg-[#080d1a] p-5 lg:block">
       <div className="mb-8">
@@ -167,11 +169,24 @@ function ComponentExplorer({
         </p>
       </div>
 
+      <label className="mb-6 block">
+        <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Search
+        </span>
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Button, input, card..."
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+        />
+      </label>
+
       <div className="space-y-6">
         {componentCategories.map((category) => (
           <ComponentCategoryGroup
             key={category}
             category={category}
+            query={query}
             selectedComponentId={selectedComponentId}
             onSelectComponent={onSelectComponent}
           />
@@ -183,16 +198,27 @@ function ComponentExplorer({
 
 interface ComponentCategoryGroupProps extends ComponentExplorerProps {
   category: ComponentCategory;
+  query: string;
 }
 
 function ComponentCategoryGroup({
   category,
+  query,
   selectedComponentId,
   onSelectComponent,
 }: ComponentCategoryGroupProps) {
-  const components = studioComponents.filter(
-    (component) => component.category === category,
-  );
+  const normalizedQuery = query.trim().toLowerCase();
+  const components = studioComponents.filter((component) => {
+    if (component.category !== category) return false;
+    if (!normalizedQuery) return true;
+
+    return [component.name, component.description, component.category]
+      .join(" ")
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
+
+  if (components.length === 0) return null;
 
   return (
     <section>
@@ -239,20 +265,48 @@ function Canvas({
   onSelectComponent,
   previewStyle,
 }: CanvasProps) {
+  const [viewMode, setViewMode] = useState<"all" | "selected">("all");
+  const visibleComponents =
+    viewMode === "selected"
+      ? studioComponents.filter(
+          (component) => component.id === selectedComponentId,
+        )
+      : studioComponents;
+
   return (
     <section className="min-h-0 flex-1 overflow-auto p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-          <p className="text-sm font-medium text-violet-200">Free canvas</p>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-            İlk fazda canvas, seçilebilir component showcase olarak çalışıyor.
-            Sonraki fazlarda drag/drop, zoom ve layout editing bu katmanın
-            üzerine eklenecek.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-violet-200">Free canvas</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                İlk fazda canvas, seçilebilir component showcase olarak
+                çalışıyor. Sonraki fazlarda drag/drop, zoom ve layout editing bu
+                katmanın üzerine eklenecek.
+              </p>
+            </div>
+            <div className="flex rounded-full border border-white/10 bg-black/20 p-1">
+              {(["all", "selected"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setViewMode(mode)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    viewMode === mode
+                      ? "bg-violet-500 text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {mode === "all" ? "All" : "Selected"}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-5 xl:grid-cols-2">
-          {studioComponents.map((component) => (
+          {visibleComponents.map((component) => (
             <CanvasCard
               key={component.id}
               component={component}
