@@ -41,7 +41,8 @@ export function InspectorPanel({
       <section className="mb-4 rounded-3xl border border-violet-400/20 bg-violet-500/10 p-4">
         <h3 className="text-sm font-semibold text-white">Theme generator</h3>
         <p className="mt-2 text-xs leading-5 text-slate-400">
-          Tek bir base renkten primary scale ve bağlı semantic tokenları üret.
+          Tek bir base renkten primary, neutral, intent scale ve bağlı semantic
+          tokenları üret.
         </p>
         <div className="mt-4 flex gap-2">
           <input

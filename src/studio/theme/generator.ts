@@ -14,6 +14,48 @@ const PRIMARY_SCALE = [
   ["950", 18, 0.08],
 ] as const;
 
+const NEUTRAL_SCALE = [
+  ["50", 97, 0.01],
+  ["100", 95, 0.008],
+  ["200", 90, 0.01],
+  ["300", 83, 0.012],
+  ["400", 68, 0.018],
+  ["500", 55, 0.021],
+  ["600", 45, 0.02],
+  ["700", 36, 0.018],
+  ["800", 28, 0.014],
+  ["900", 21, 0.012],
+  ["950", 9, 0],
+] as const;
+
+const INTENT_SCALE = [
+  ["50", 97, 0.02],
+  ["100", 93, 0.045],
+  ["200", 86, 0.09],
+  ["300", 78, 0.15],
+  ["400", 71, 0.2],
+  ["500", 65, 0.233],
+  ["600", 58, 0.22],
+  ["700", 49, 0.19],
+  ["800", 40, 0.15],
+  ["900", 32, 0.11],
+  ["950", 22, 0.08],
+] as const;
+
+const WARNING_SCALE = [
+  ["50", 98, 0.025],
+  ["100", 95, 0.055],
+  ["200", 90, 0.09],
+  ["300", 84, 0.125],
+  ["400", 81, 0.145],
+  ["500", 78, 0.159],
+  ["600", 69, 0.15],
+  ["700", 58, 0.13],
+  ["800", 46, 0.1],
+  ["900", 35, 0.075],
+  ["950", 24, 0.055],
+] as const;
+
 interface RgbColor {
   red: number;
   green: number;
@@ -23,28 +65,81 @@ interface RgbColor {
 export function createThemeFromBaseColor(hexColor: string): TokenOverrides {
   const rgb = parseHexColor(hexColor) ?? { red: 124, green: 58, blue: 237 };
   const hue = Math.round(rgbToHslHue(rgb));
-  const foreground = relativeLuminance(rgb) > 0.56 ? "oklch(9% 0 0)" : "oklch(100% 0 0)";
-
-  const primaryScale = Object.fromEntries(
-    PRIMARY_SCALE.map(([step, lightness, chroma]) => [
-      `--bambi-primary-${step}`,
-      `oklch(${lightness}% ${chroma} ${hue})`,
-    ]),
-  );
+  const primaryForeground =
+    relativeLuminance(rgb) > 0.56 ? "oklch(9% 0 0)" : "oklch(100% 0 0)";
+  const neutralHue = normalizeHue(hue + 8);
 
   return {
-    ...primaryScale,
+    ...createScale("--bambi-primary", PRIMARY_SCALE, hue),
+    ...createScale("--bambi-neutral", NEUTRAL_SCALE, neutralHue),
+    ...createScale("--bambi-danger", INTENT_SCALE, 28),
+    ...createScale("--bambi-success", INTENT_SCALE, 153),
+    ...createScale("--bambi-warning", WARNING_SCALE, 74),
+    "--bambi-background": "var(--bambi-neutral-50)",
+    "--bambi-foreground": "var(--bambi-neutral-950)",
+    "--bambi-card": "var(--bambi-color-white)",
+    "--bambi-card-foreground": "var(--bambi-neutral-950)",
+    "--bambi-popover": "var(--bambi-color-white)",
+    "--bambi-popover-foreground": "var(--bambi-neutral-950)",
     "--bambi-primary": "var(--bambi-primary-500)",
-    "--bambi-primary-foreground": foreground,
+    "--bambi-primary-foreground": primaryForeground,
+    "--bambi-secondary": "var(--bambi-neutral-100)",
+    "--bambi-secondary-foreground": "var(--bambi-neutral-950)",
+    "--bambi-accent": "var(--bambi-neutral-100)",
+    "--bambi-accent-foreground": "var(--bambi-neutral-950)",
+    "--bambi-muted": "var(--bambi-neutral-100)",
+    "--bambi-muted-foreground": "var(--bambi-neutral-500)",
+    "--bambi-danger": "var(--bambi-danger-500)",
+    "--bambi-danger-foreground": "var(--bambi-color-white)",
+    "--bambi-success": "var(--bambi-success-500)",
+    "--bambi-success-foreground": "var(--bambi-neutral-950)",
+    "--bambi-warning": "var(--bambi-warning-500)",
+    "--bambi-warning-foreground": "var(--bambi-neutral-950)",
+    "--bambi-border": "var(--bambi-neutral-200)",
+    "--bambi-input": "var(--bambi-neutral-200)",
+    "--bambi-input-background": "var(--bambi-color-white)",
+    "--bambi-input-foreground": "var(--bambi-neutral-950)",
+    "--bambi-input-placeholder": "var(--bambi-neutral-500)",
     "--bambi-ring": "var(--bambi-primary)",
+    "--bambi-separator": "var(--bambi-neutral-200)",
     "--bambi-intent-primary-bg": "var(--bambi-primary)",
     "--bambi-intent-primary-fg": "var(--bambi-primary-foreground)",
     "--bambi-intent-primary-hover-bg": "var(--bambi-primary-600)",
+    "--bambi-intent-secondary-bg": "var(--bambi-secondary)",
+    "--bambi-intent-secondary-fg": "var(--bambi-secondary-foreground)",
+    "--bambi-intent-secondary-hover-bg": "var(--bambi-accent)",
+    "--bambi-intent-danger-bg": "var(--bambi-danger)",
+    "--bambi-intent-danger-fg": "var(--bambi-danger-foreground)",
+    "--bambi-intent-danger-hover-bg": "var(--bambi-danger-600)",
+    "--bambi-intent-success-bg": "var(--bambi-success)",
+    "--bambi-intent-success-fg": "var(--bambi-success-foreground)",
+    "--bambi-intent-success-hover-bg": "var(--bambi-success-600)",
+    "--bambi-intent-warning-bg": "var(--bambi-warning)",
+    "--bambi-intent-warning-fg": "var(--bambi-warning-foreground)",
+    "--bambi-intent-warning-hover-bg": "var(--bambi-warning-600)",
   };
 }
 
 export function isValidHexColor(value: string): boolean {
   return parseHexColor(value) !== null;
+}
+
+function createScale(
+  prefix: string,
+  scale: readonly (readonly [string, number, number])[],
+  hue: number,
+): TokenOverrides {
+  return Object.fromEntries(
+    scale.map(([step, lightness, chroma]) => [
+      `${prefix}-${step}`,
+      `oklch(${lightness}% ${chroma} ${normalizeHue(hue)})`,
+    ]),
+  );
+}
+
+function normalizeHue(hue: number): number {
+  const normalized = hue % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
 }
 
 function parseHexColor(value: string): RgbColor | null {
