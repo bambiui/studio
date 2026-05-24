@@ -4,8 +4,12 @@ interface TopBarProps {
   tokenCount: number;
   previewScheme: PreviewScheme;
   importMessage: string | null;
+  canUndo: boolean;
+  canRedo: boolean;
   onChangePreviewScheme: (scheme: PreviewScheme) => void;
   onImportTheme: (file: File) => void;
+  onUndo: () => void;
+  onRedo: () => void;
   onOpenExport: () => void;
 }
 
@@ -13,8 +17,12 @@ export function TopBar({
   tokenCount,
   previewScheme,
   importMessage,
+  canUndo,
+  canRedo,
   onChangePreviewScheme,
   onImportTheme,
+  onUndo,
+  onRedo,
   onOpenExport,
 }: TopBarProps) {
   return (
@@ -52,6 +60,24 @@ export function TopBar({
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
           {tokenCount} override
         </span>
+        <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 md:flex">
+          <button
+            type="button"
+            disabled={!canUndo}
+            onClick={onUndo}
+            className="rounded-full px-3 py-1 text-xs font-medium text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            disabled={!canRedo}
+            onClick={onRedo}
+            className="rounded-full px-3 py-1 text-xs font-medium text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Redo
+          </button>
+        </div>
         <label className="cursor-pointer rounded-full border border-white/10 px-4 py-2 font-medium text-slate-200 transition hover:bg-white/10">
           Import
           <input

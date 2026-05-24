@@ -18,6 +18,8 @@ export function StudioShell() {
     studioComponents[0]?.id ?? "",
   );
   const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
+  const [historyPast, setHistoryPast] = useState<TokenOverrides[]>([]);
+  const [historyFuture, setHistoryFuture] = useState<TokenOverrides[]>([]);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
   const [previewScheme, setPreviewScheme] = useState<PreviewScheme>("light");
@@ -53,8 +55,19 @@ export function StudioShell() {
     [previewScheme, tokenOverrides],
   );
 
-  const updateToken = (tokenId: string, value: string) => {
+  const commitTokenOverrides = (
+    updater: TokenOverrides | ((current: TokenOverrides) => TokenOverrides),
+  ) => {
     setTokenOverrides((current) => {
+      const next = typeof updater === "function" ? updater(current) : updater;
+      setHistoryPast((past) => [...past, current]);
+      setHistoryFuture([]);
+      return next;
+    });
+  };
+
+  const updateToken = (tokenId: string, value: string) => {
+    commitTokenOverrides((current) => {
       if (!value.trim()) {
         const next = { ...current };
         delete next[tokenId];
@@ -68,10 +81,30 @@ export function StudioShell() {
     });
   };
 
-  const resetTokens = () => setTokenOverrides({});
+  const resetTokens = () => commitTokenOverrides({});
+
+  const undoThemeChange = () => {
+    setHistoryPast((past) => {
+      const previous = past[past.length - 1];
+      if (!previous) return past;
+      setHistoryFuture((future) => [tokenOverrides, ...future]);
+      setTokenOverrides(previous);
+      return past.slice(0, -1);
+    });
+  };
+
+  const redoThemeChange = () => {
+    setHistoryFuture((future) => {
+      const next = future[0];
+      if (!next) return future;
+      setHistoryPast((past) => [...past, tokenOverrides]);
+      setTokenOverrides(next);
+      return future.slice(1);
+    });
+  };
 
   const applyGeneratedTheme = (baseColor: string) => {
-    setTokenOverrides((current) => ({
+    commitTokenOverrides((current) => ({
       ...current,
       ...createThemeFromBaseColor(baseColor),
     }));
@@ -81,7 +114,7 @@ export function StudioShell() {
     try {
       const source = await file.text();
       const importedTokens = parseThemeImport(source);
-      setTokenOverrides(importedTokens);
+      commitTokenOverrides(importedTokens);
       setImportMessage(`Imported ${Object.keys(importedTokens).length} tokens`);
     } catch (error) {
       setImportMessage(
@@ -101,8 +134,12 @@ export function StudioShell() {
           tokenCount={Object.keys(tokenOverrides).length}
           previewScheme={previewScheme}
           importMessage={importMessage}
+          canUndo={historyPast.length > 0}
+          canRedo={historyFuture.length > 0}
           onChangePreviewScheme={setPreviewScheme}
           onImportTheme={importTheme}
+          onUndo={undoThemeChange}
+          onRedo={redoThemeChange}
           onOpenExport={() => setIsExportOpen(true)}
         />
         <Canvas
