@@ -37,21 +37,37 @@ export function Canvas({
                 katmanın üzerine eklenecek.
               </p>
             </div>
-            <div className="flex rounded-full border border-white/10 bg-black/20 p-1">
-              {(["all", "selected"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setViewMode(mode)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                    viewMode === mode
-                      ? "bg-violet-500 text-white"
-                      : "text-slate-400 hover:text-white"
-                  }`}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="lg:hidden">
+                <span className="sr-only">Select component</span>
+                <select
+                  value={selectedComponentId}
+                  onChange={(event) => onSelectComponent(event.target.value)}
+                  className="rounded-full border border-white/10 bg-[#050814] px-3 py-2 text-xs font-medium text-slate-200 outline-none focus:border-violet-400"
                 >
-                  {mode === "all" ? "All" : "Selected"}
-                </button>
-              ))}
+                  {studioComponents.map((component) => (
+                    <option key={component.id} value={component.id}>
+                      {component.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex rounded-full border border-white/10 bg-black/20 p-1">
+                {(["all", "selected"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setViewMode(mode)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                      viewMode === mode
+                        ? "bg-violet-500 text-white"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {mode === "all" ? "All" : "Selected"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
