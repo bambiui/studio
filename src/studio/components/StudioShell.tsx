@@ -103,6 +103,28 @@ export function StudioShell() {
     });
   };
 
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const modifier = event.metaKey || event.ctrlKey;
+      if (!modifier) return;
+
+      const key = event.key.toLowerCase();
+      if (key === "z" && event.shiftKey) {
+        event.preventDefault();
+        redoThemeChange();
+      } else if (key === "z") {
+        event.preventDefault();
+        undoThemeChange();
+      } else if (key === "y") {
+        event.preventDefault();
+        redoThemeChange();
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  });
+
   const applyGeneratedTheme = (baseColor: string) => {
     commitTokenOverrides((current) => ({
       ...current,
