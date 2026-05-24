@@ -14,6 +14,7 @@ import {
   serializeThemeAsPreset,
 } from "../theme/exporters";
 import { createThemeFromBaseColor, isValidHexColor } from "../theme/generator";
+import { parseThemeImport } from "../theme/importers";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import { tokenDefinitionMap, type TokenDefinition } from "../tokens/metadata";
 
@@ -47,6 +48,7 @@ export function StudioShell() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
   const [previewScheme, setPreviewScheme] = useState<PreviewScheme>("light");
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -102,6 +104,19 @@ export function StudioShell() {
     }));
   };
 
+  const importTheme = async (file: File) => {
+    try {
+      const source = await file.text();
+      const importedTokens = parseThemeImport(source);
+      setTokenOverrides(importedTokens);
+      setImportMessage(`Imported ${Object.keys(importedTokens).length} tokens`);
+    } catch (error) {
+      setImportMessage(
+        error instanceof Error ? error.message : "Theme import failed",
+      );
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0b1020] text-slate-100">
       <ComponentExplorer
@@ -112,7 +127,9 @@ export function StudioShell() {
         <TopBar
           tokenCount={Object.keys(tokenOverrides).length}
           previewScheme={previewScheme}
+          importMessage={importMessage}
           onChangePreviewScheme={setPreviewScheme}
+          onImportTheme={importTheme}
           onOpenExport={() => setIsExportOpen(true)}
         />
         <Canvas
@@ -140,14 +157,18 @@ export function StudioShell() {
 interface TopBarProps {
   tokenCount: number;
   previewScheme: PreviewScheme;
+  importMessage: string | null;
   onChangePreviewScheme: (scheme: PreviewScheme) => void;
+  onImportTheme: (file: File) => void;
   onOpenExport: () => void;
 }
 
 function TopBar({
   tokenCount,
   previewScheme,
+  importMessage,
   onChangePreviewScheme,
+  onImportTheme,
   onOpenExport,
 }: TopBarProps) {
   return (
@@ -156,7 +177,14 @@ function TopBar({
         <p className="text-xs font-medium uppercase tracking-[0.24em] text-violet-300">
           BambiUI Platform
         </p>
-        <h1 className="text-lg font-semibold text-white">Studio</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-semibold text-white">Studio</h1>
+          {importMessage ? (
+            <span className="hidden text-xs text-slate-500 md:inline">
+              {importMessage}
+            </span>
+          ) : null}
+        </div>
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-300">
         <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 sm:flex">
@@ -178,6 +206,19 @@ function TopBar({
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
           {tokenCount} override
         </span>
+        <label className="cursor-pointer rounded-full border border-white/10 px-4 py-2 font-medium text-slate-200 transition hover:bg-white/10">
+          Import
+          <input
+            type="file"
+            accept="application/json,.json"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onImportTheme(file);
+              event.currentTarget.value = "";
+            }}
+          />
+        </label>
         <button
           type="button"
           onClick={onOpenExport}
