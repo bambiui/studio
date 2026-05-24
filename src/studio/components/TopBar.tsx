@@ -82,7 +82,7 @@ export function TopBar({
           Import
           <input
             type="file"
-            accept="application/json,.json"
+            accept="application/json,.json,text/css,.css"
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];

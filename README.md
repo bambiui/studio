@@ -68,4 +68,8 @@ Studio supports three export modes:
 2. JSON token payload
 3. BambiUI preset draft
 
-Imported files can either be a flat token map or an object with a `tokens` field.
+Imported files can be:
+
+- a flat JSON token map
+- a JSON object with a `tokens` field
+- a CSS file containing custom property declarations
