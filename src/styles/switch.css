@@ -1,0 +1,93 @@
+[data-bambi-switch] {
+  --bambi-switch-width: 2.25rem;
+  --bambi-switch-height: 1.25rem;
+  --bambi-switch-thumb-size: 1rem;
+  --bambi-switch-padding: 0.125rem;
+  --bambi-switch-radius: 999px;
+  --bambi-switch-bg: var(--bambi-muted, oklch(92% 0.01 271));
+  --bambi-switch-bg-checked: var(--bambi-primary, oklch(49% 0.23 271));
+  --bambi-switch-bg-invalid: var(--bambi-danger, oklch(55% 0.22 28));
+  --bambi-switch-thumb-bg: var(--bambi-background, white);
+  --bambi-switch-thumb-shadow: 0 1px 2px oklch(0% 0 0 / 0.2);
+  --bambi-switch-label-color: var(--bambi-foreground, oklch(9% 0 0));
+  --bambi-switch-gap: var(--bambi-space-2, 0.5rem);
+  --bambi-switch-focus-ring: var(--bambi-ring, oklch(49% 0.23 271));
+  --bambi-switch-focus-ring-width: var(--bambi-state-focus-ring-width, 2px);
+  --bambi-switch-focus-ring-offset: var(--bambi-state-focus-ring-offset, 2px);
+  --bambi-switch-disabled-opacity: var(--bambi-state-disabled-opacity, 0.5);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bambi-switch-gap);
+  color: var(--bambi-switch-label-color);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+[data-bambi-switch]:focus-visible [data-bambi-switch-thumb] {
+  outline: var(--bambi-switch-focus-ring-width) solid var(--bambi-switch-focus-ring);
+  outline-offset: var(--bambi-switch-focus-ring-offset);
+}
+
+[data-bambi-switch-thumb] {
+  position: relative;
+  display: inline-flex;
+  width: var(--bambi-switch-width);
+  height: var(--bambi-switch-height);
+  flex: 0 0 auto;
+  align-items: center;
+  border-radius: var(--bambi-switch-radius);
+  background: var(--bambi-switch-bg);
+  transition: background-color 150ms ease;
+}
+
+[data-bambi-switch-thumb]::after {
+  content: "";
+  position: absolute;
+  left: var(--bambi-switch-padding);
+  width: var(--bambi-switch-thumb-size);
+  height: var(--bambi-switch-thumb-size);
+  border-radius: 999px;
+  background: var(--bambi-switch-thumb-bg);
+  box-shadow: var(--bambi-switch-thumb-shadow);
+  transition: transform 150ms ease;
+}
+
+[data-bambi-switch][data-state="checked"] [data-bambi-switch-thumb],
+[data-bambi-switch-thumb][data-state="checked"] {
+  background: var(--bambi-switch-bg-checked);
+}
+
+[data-bambi-switch][data-state="checked"] [data-bambi-switch-thumb]::after,
+[data-bambi-switch-thumb][data-state="checked"]::after {
+  transform: translateX(calc(var(--bambi-switch-width) - var(--bambi-switch-thumb-size) - (var(--bambi-switch-padding) * 2)));
+}
+
+[data-bambi-switch][data-invalid="true"] [data-bambi-switch-thumb],
+[data-bambi-switch-thumb][data-invalid="true"] {
+  background: var(--bambi-switch-bg-invalid);
+}
+
+[data-bambi-switch][data-disabled="true"],
+[data-bambi-switch-thumb][data-disabled="true"],
+[data-bambi-switch-label][data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--bambi-switch-disabled-opacity);
+}
+
+[data-bambi-switch-label] {
+  color: inherit;
+  cursor: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-bambi-switch-thumb],
+  [data-bambi-switch-thumb]::after {
+    transition: none;
+  }
+}

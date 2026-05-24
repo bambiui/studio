@@ -1,0 +1,15 @@
+[data-bambi-spinner] {
+
+  display: inline-block; width: var(--bambi-spinner-size, 1rem); height: var(--bambi-spinner-size, 1rem); border-radius: 999px; border: 2px solid var(--bambi-muted, oklch(88% 0 0)); border-top-color: var(--bambi-primary, oklch(55% 0.18 250)); animation: bambi-spinner-spin 0.8s linear infinite;
+
+}
+
+[data-bambi-spinner][data-size="sm"] { --bambi-spinner-size: 1rem; }
+
+[data-bambi-spinner][data-size="md"] { --bambi-spinner-size: 1.25rem; }
+
+[data-bambi-spinner][data-size="lg"] { --bambi-spinner-size: 2rem; }
+
+@keyframes bambi-spinner-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) { [data-bambi-spinner] { animation-duration: 1.5s; } }

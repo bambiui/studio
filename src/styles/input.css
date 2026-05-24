@@ -1,0 +1,73 @@
+[data-bambi-input] {
+  --bambi-input-height-sm: 2rem;
+  --bambi-input-height-md: 2.5rem;
+  --bambi-input-height-lg: 3rem;
+  --bambi-input-padding-x-sm: var(--bambi-space-2, 0.5rem);
+  --bambi-input-padding-x-md: var(--bambi-space-3, 0.75rem);
+  --bambi-input-padding-x-lg: var(--bambi-space-4, 1rem);
+  --bambi-input-radius: var(--bambi-radius-md, 0.5rem);
+  --bambi-input-border-width: 1px;
+  --bambi-input-border: var(--bambi-input, var(--bambi-border, oklch(90% 0.01 271)));
+  --bambi-input-border-invalid: var(--bambi-danger, oklch(65% 0.233 28));
+  --bambi-input-bg: var(--bambi-input-background, white);
+  --bambi-input-fg: var(--bambi-input-foreground, var(--bambi-foreground, oklch(9% 0 0)));
+  --bambi-input-placeholder-color: var(--bambi-input-placeholder, var(--bambi-muted-foreground, oklch(55% 0.021 271)));
+  --bambi-input-focus-ring: var(--bambi-state-focus-ring, var(--bambi-ring, oklch(49% 0.23 271)));
+  --bambi-input-focus-ring-width: var(--bambi-state-focus-ring-width, 2px);
+  --bambi-input-focus-ring-offset: var(--bambi-state-focus-ring-offset, 2px);
+  --bambi-input-disabled-opacity: var(--bambi-state-disabled-opacity, 0.5);
+
+  display: flex;
+  width: 100%;
+  height: var(--bambi-input-height-md);
+  border: var(--bambi-input-border-width) solid var(--bambi-input-border);
+  border-radius: var(--bambi-input-radius);
+  background: var(--bambi-input-bg);
+  color: var(--bambi-input-fg);
+  padding: 0 var(--bambi-input-padding-x-md);
+  font: inherit;
+  font-size: var(--bambi-text-sm, 0.875rem);
+  line-height: 1.25;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+[data-bambi-input]::placeholder {
+  color: var(--bambi-input-placeholder-color);
+}
+
+[data-bambi-input]:focus-visible {
+  outline: var(--bambi-input-focus-ring-width) solid var(--bambi-input-focus-ring);
+  outline-offset: var(--bambi-input-focus-ring-offset);
+}
+
+[data-bambi-input][data-size="sm"] {
+  height: var(--bambi-input-height-sm);
+  padding-inline: var(--bambi-input-padding-x-sm);
+}
+
+[data-bambi-input][data-size="lg"] {
+  height: var(--bambi-input-height-lg);
+  padding-inline: var(--bambi-input-padding-x-lg);
+}
+
+[data-bambi-input][data-variant="ghost"] {
+  border-color: transparent;
+  background: transparent;
+}
+
+[data-bambi-input][data-invalid="true"] {
+  border-color: var(--bambi-input-border-invalid);
+}
+
+[data-bambi-input][data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--bambi-input-disabled-opacity);
+}
+
+[data-bambi-input][data-readonly="true"] {
+  cursor: default;
+}

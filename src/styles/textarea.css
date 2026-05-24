@@ -1,0 +1,86 @@
+[data-bambi-textarea] {
+  --bambi-textarea-min-height-sm: 4rem;
+  --bambi-textarea-min-height-md: 5rem;
+  --bambi-textarea-min-height-lg: 7rem;
+  --bambi-textarea-padding-sm: var(--bambi-space-2, 0.5rem);
+  --bambi-textarea-padding-md: var(--bambi-space-3, 0.75rem);
+  --bambi-textarea-padding-lg: var(--bambi-space-4, 1rem);
+  --bambi-textarea-radius: var(--bambi-radius-md, 0.5rem);
+  --bambi-textarea-border-width: 1px;
+  --bambi-textarea-border: var(--bambi-input, var(--bambi-border, oklch(90% 0.01 271)));
+  --bambi-textarea-border-invalid: var(--bambi-danger, oklch(65% 0.233 28));
+  --bambi-textarea-bg: var(--bambi-input-background, white);
+  --bambi-textarea-fg: var(--bambi-input-foreground, var(--bambi-foreground, oklch(9% 0 0)));
+  --bambi-textarea-placeholder-color: var(--bambi-input-placeholder, var(--bambi-muted-foreground, oklch(55% 0.021 271)));
+  --bambi-textarea-focus-ring: var(--bambi-state-focus-ring, var(--bambi-ring, oklch(49% 0.23 271)));
+  --bambi-textarea-focus-ring-width: var(--bambi-state-focus-ring-width, 2px);
+  --bambi-textarea-focus-ring-offset: var(--bambi-state-focus-ring-offset, 2px);
+  --bambi-textarea-disabled-opacity: var(--bambi-state-disabled-opacity, 0.5);
+
+  display: flex;
+  width: 100%;
+  min-height: var(--bambi-textarea-min-height-md);
+  border: var(--bambi-textarea-border-width) solid var(--bambi-textarea-border);
+  border-radius: var(--bambi-textarea-radius);
+  background: var(--bambi-textarea-bg);
+  color: var(--bambi-textarea-fg);
+  padding: var(--bambi-textarea-padding-md);
+  font: inherit;
+  font-size: var(--bambi-text-sm, 0.875rem);
+  line-height: 1.5;
+  resize: vertical;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+[data-bambi-textarea]::placeholder {
+  color: var(--bambi-textarea-placeholder-color);
+}
+
+[data-bambi-textarea]:focus-visible {
+  outline: var(--bambi-textarea-focus-ring-width) solid var(--bambi-textarea-focus-ring);
+  outline-offset: var(--bambi-textarea-focus-ring-offset);
+}
+
+[data-bambi-textarea][data-size="sm"] {
+  min-height: var(--bambi-textarea-min-height-sm);
+  padding: var(--bambi-textarea-padding-sm);
+}
+
+[data-bambi-textarea][data-size="lg"] {
+  min-height: var(--bambi-textarea-min-height-lg);
+  padding: var(--bambi-textarea-padding-lg);
+}
+
+[data-bambi-textarea][data-variant="ghost"] {
+  border-color: transparent;
+  background: transparent;
+}
+
+[data-bambi-textarea][data-invalid="true"] {
+  border-color: var(--bambi-textarea-border-invalid);
+}
+
+[data-bambi-textarea][data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--bambi-textarea-disabled-opacity);
+}
+
+[data-bambi-textarea][data-readonly="true"] {
+  cursor: default;
+}
+
+[data-bambi-textarea][data-resize="none"] {
+  resize: none;
+}
+
+[data-bambi-textarea][data-resize="horizontal"] {
+  resize: horizontal;
+}
+
+[data-bambi-textarea][data-resize="both"] {
+  resize: both;
+}

@@ -1,0 +1,24 @@
+[data-bambi-label] {
+  --bambi-label-color: var(--bambi-foreground, oklch(9% 0 0));
+  --bambi-label-required-color: var(--bambi-danger, oklch(65% 0.233 28));
+  --bambi-label-disabled-opacity: var(--bambi-state-disabled-opacity, 0.5);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bambi-space-1, 0.25rem);
+  color: var(--bambi-label-color);
+  font-size: var(--bambi-text-sm, 0.875rem);
+  font-weight: var(--bambi-font-weight-medium, 500);
+  line-height: 1.25;
+  cursor: default;
+}
+
+[data-bambi-label][data-required="true"]::after {
+  content: "*";
+  color: var(--bambi-label-required-color);
+}
+
+[data-bambi-label][data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--bambi-label-disabled-opacity);
+}

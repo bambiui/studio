@@ -1,0 +1,7 @@
+[data-bambi-combobox] { position: relative; display: inline-flex; gap: 0.25rem; }
+[data-bambi-combobox-input] { min-width: 14rem; border: 1px solid hsl(240 5.9% 90%); border-radius: 0.375rem; padding: 0.5rem 0.75rem; }
+[data-bambi-combobox-trigger] { border: 1px solid hsl(240 5.9% 90%); border-radius: 0.375rem; background: white; padding: 0.5rem; }
+[data-bambi-combobox-content] { position: absolute; top: calc(100% + 0.25rem); left: 0; z-index: 50; min-width: 14rem; border: 1px solid hsl(240 5.9% 90%); border-radius: 0.5rem; background: white; padding: 0.25rem; box-shadow: 0 10px 15px -3px hsl(240 10% 3.9% / 0.1); }
+[data-bambi-combobox-item] { cursor: default; border-radius: 0.25rem; padding: 0.375rem 0.5rem; }
+[data-bambi-combobox-item]:focus, [data-bambi-combobox-item][data-state="checked"] { outline: none; background: hsl(240 4.8% 95.9%); }
+[data-bambi-combobox-empty] { padding: 0.75rem; color: hsl(240 3.8% 46.1%); }

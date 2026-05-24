@@ -1,0 +1,9 @@
+[data-bambi-code] {
+
+  border-radius: var(--bambi-radius-sm, 0.25rem); background: var(--bambi-muted, oklch(96% 0 0)); color: var(--bambi-foreground, black); font-family: var(--bambi-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+
+}
+
+[data-bambi-code][data-variant="inline"] { padding: 0.125rem 0.25rem; font-size: 0.875em; }
+
+[data-bambi-code][data-variant="block"] { display: block; overflow-x: auto; padding: var(--bambi-space-4, 1rem); font-size: var(--bambi-text-sm, 0.875rem); line-height: 1.6; }

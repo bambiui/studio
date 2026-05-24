@@ -1,0 +1,19 @@
+[data-bambi-callout] {
+
+  display: grid; grid-template-columns: auto 1fr; gap: var(--bambi-space-3, 0.75rem); border-radius: var(--bambi-radius-lg, 0.75rem); border: 1px solid var(--bambi-border, oklch(90% 0 0)); padding: var(--bambi-space-4, 1rem); background: var(--bambi-muted, oklch(97% 0 0)); color: var(--bambi-foreground, black);
+
+}
+
+[data-bambi-callout-icon] { grid-row: span 2; color: var(--bambi-callout-accent, currentColor); }
+
+[data-bambi-callout-title] { font-weight: 600; }
+
+[data-bambi-callout-description] { color: var(--bambi-muted-foreground, oklch(45% 0 0)); font-size: var(--bambi-text-sm, 0.875rem); }
+
+[data-bambi-callout][data-variant="info"] { --bambi-callout-accent: var(--bambi-primary, oklch(55% 0.18 250)); }
+
+[data-bambi-callout][data-variant="success"] { --bambi-callout-accent: var(--bambi-success, oklch(62% 0.18 145)); }
+
+[data-bambi-callout][data-variant="warning"] { --bambi-callout-accent: var(--bambi-warning, oklch(75% 0.17 75)); }
+
+[data-bambi-callout][data-variant="danger"] { --bambi-callout-accent: var(--bambi-danger, oklch(65% 0.23 28)); }

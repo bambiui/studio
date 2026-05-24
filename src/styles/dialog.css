@@ -1,0 +1,176 @@
+[data-bambi-dialog] {
+  display: contents;
+}
+
+[data-bambi-dialog-trigger] {
+  cursor: pointer;
+}
+
+[data-bambi-dialog-trigger][data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--bambi-state-disabled-opacity, 0.5);
+}
+
+[data-bambi-dialog-portal] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bambi-dialog-z-index, 50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+[data-bambi-dialog-portal][hidden],
+[data-bambi-dialog-overlay][hidden],
+[data-bambi-dialog-content][hidden] {
+  display: none;
+}
+
+[data-bambi-dialog-overlay] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bambi-dialog-overlay-z-index, 50);
+  background: var(--bambi-dialog-overlay-bg, oklch(0% 0 0 / 0.5));
+  pointer-events: auto;
+}
+
+[data-bambi-dialog-content] {
+  --bambi-dialog-content-width: min(calc(100vw - 2rem), 32rem);
+  --bambi-dialog-content-max-height: calc(100vh - 2rem);
+  --bambi-dialog-content-padding: var(--bambi-space-6, 1.5rem);
+  --bambi-dialog-content-radius: var(--bambi-radius-lg, 0.75rem);
+  --bambi-dialog-content-bg: var(--bambi-popover, var(--bambi-card, white));
+  --bambi-dialog-content-fg: var(--bambi-popover-foreground, var(--bambi-card-foreground, oklch(9% 0 0)));
+  --bambi-dialog-content-border: var(--bambi-border, oklch(90% 0.01 271));
+  --bambi-dialog-content-shadow: var(--bambi-shadow-lg, 0 10px 15px -3px oklch(0% 0 0 / 0.1));
+  --bambi-dialog-focus-ring: var(--bambi-ring, oklch(49% 0.23 271));
+  --bambi-dialog-focus-ring-width: var(--bambi-state-focus-ring-width, 2px);
+  --bambi-dialog-focus-ring-offset: var(--bambi-state-focus-ring-offset, 2px);
+
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: var(--bambi-dialog-content-z-index, 51);
+  width: var(--bambi-dialog-content-width);
+  max-height: var(--bambi-dialog-content-max-height);
+  overflow: auto;
+  border: 1px solid var(--bambi-dialog-content-border);
+  border-radius: var(--bambi-dialog-content-radius);
+  background: var(--bambi-dialog-content-bg);
+  color: var(--bambi-dialog-content-fg);
+  box-shadow: var(--bambi-dialog-content-shadow);
+  padding: var(--bambi-dialog-content-padding);
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
+[data-bambi-dialog-content]:focus-visible {
+  outline: var(--bambi-dialog-focus-ring-width) solid var(--bambi-dialog-focus-ring);
+  outline-offset: var(--bambi-dialog-focus-ring-offset);
+}
+
+[data-bambi-dialog-overlay][data-state="open"] {
+  animation: bambi-dialog-overlay-in 160ms ease-out;
+}
+
+[data-bambi-dialog-overlay][data-state="closed"] {
+  animation: bambi-dialog-overlay-out 120ms ease-in;
+}
+
+[data-bambi-dialog-content][data-state="open"] {
+  animation: bambi-dialog-content-in 160ms ease-out;
+}
+
+[data-bambi-dialog-content][data-state="closed"] {
+  animation: bambi-dialog-content-out 120ms ease-in;
+}
+
+[data-bambi-dialog-title] {
+  margin: 0;
+  color: inherit;
+  font-size: var(--bambi-text-lg, 1.125rem);
+  font-weight: var(--bambi-font-weight-semibold, 600);
+  line-height: 1.25;
+}
+
+[data-bambi-dialog-description] {
+  margin: var(--bambi-space-2, 0.5rem) 0 0;
+  color: var(--bambi-muted-foreground, oklch(55% 0.021 271));
+  font-size: var(--bambi-text-sm, 0.875rem);
+  line-height: 1.5;
+}
+
+[data-bambi-dialog-close] {
+  position: absolute;
+  top: var(--bambi-space-3, 0.75rem);
+  right: var(--bambi-space-3, 0.75rem);
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--bambi-radius-sm, 0.375rem);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+[data-bambi-dialog-close]:hover {
+  background: var(--bambi-accent, oklch(95% 0.008 271));
+}
+
+[data-bambi-dialog-close]:focus-visible {
+  outline: var(--bambi-state-focus-ring-width, 2px) solid var(--bambi-ring, oklch(49% 0.23 271));
+  outline-offset: var(--bambi-state-focus-ring-offset, 2px);
+}
+
+@keyframes bambi-dialog-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bambi-dialog-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bambi-dialog-content-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes bambi-dialog-content-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-bambi-dialog-overlay][data-state="open"],
+  [data-bambi-dialog-overlay][data-state="closed"],
+  [data-bambi-dialog-content][data-state="open"],
+  [data-bambi-dialog-content][data-state="closed"] {
+    animation: none;
+  }
+}

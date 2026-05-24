@@ -1,0 +1,19 @@
+[data-bambi-container] {
+
+  width: min(100% - (var(--bambi-space-4, 1rem) * 2), var(--bambi-container-width, 72rem)); margin-inline: auto;
+
+}
+
+[data-bambi-container][data-size="sm"] { --bambi-container-width: 40rem; }
+
+[data-bambi-container][data-size="md"] { --bambi-container-width: 56rem; }
+
+[data-bambi-container][data-size="lg"] { --bambi-container-width: 72rem; }
+
+[data-bambi-container][data-size="xl"] { --bambi-container-width: 88rem; }
+
+[data-bambi-container][data-size="full"] { --bambi-container-width: 100%; }
+
+[data-bambi-container][data-align="start"] { margin-inline-start: 0; }
+
+[data-bambi-container][data-align="end"] { margin-inline-end: 0; }

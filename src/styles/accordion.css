@@ -1,0 +1,68 @@
+[data-bambi-accordion] {
+  --bambi-accordion-border: var(--bambi-border, oklch(90% 0.01 271));
+  --bambi-accordion-radius: var(--bambi-radius-md, 0.5rem);
+  --bambi-accordion-trigger-padding-x: var(--bambi-space-4, 1rem);
+  --bambi-accordion-trigger-padding-y: var(--bambi-space-3, 0.75rem);
+  --bambi-accordion-trigger-color: var(--bambi-foreground, oklch(9% 0 0));
+  --bambi-accordion-trigger-hover-bg: var(--bambi-accent, oklch(95% 0.008 271));
+  --bambi-accordion-trigger-font-weight: var(--bambi-font-weight-medium, 500);
+  --bambi-accordion-content-padding-x: var(--bambi-space-4, 1rem);
+  --bambi-accordion-content-padding-y: var(--bambi-space-3, 0.75rem);
+  --bambi-accordion-content-color: var(--bambi-foreground, oklch(9% 0 0));
+  --bambi-accordion-focus-ring: var(--bambi-ring, oklch(49% 0.23 271));
+  --bambi-accordion-focus-ring-width: var(--bambi-state-focus-ring-width, 2px);
+  --bambi-accordion-focus-ring-offset: var(--bambi-state-focus-ring-offset, 2px);
+  --bambi-accordion-disabled-opacity: var(--bambi-state-disabled-opacity, 0.5);
+
+  display: block;
+  border: 1px solid var(--bambi-accordion-border);
+  border-radius: var(--bambi-accordion-radius);
+}
+
+[data-bambi-accordion-item] + [data-bambi-accordion-item] {
+  border-top: 1px solid var(--bambi-accordion-border);
+}
+
+[data-bambi-accordion-header] {
+  margin: 0;
+}
+
+[data-bambi-accordion-trigger] {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--bambi-accordion-trigger-padding-y) var(--bambi-accordion-trigger-padding-x);
+  color: var(--bambi-accordion-trigger-color);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: var(--bambi-accordion-trigger-font-weight);
+  text-align: start;
+  cursor: pointer;
+}
+
+[data-bambi-accordion-trigger]:hover:not([data-disabled="true"]):not(:disabled) {
+  background: var(--bambi-accordion-trigger-hover-bg);
+}
+
+[data-bambi-accordion-trigger]:focus-visible {
+  outline: var(--bambi-accordion-focus-ring-width) solid var(--bambi-accordion-focus-ring);
+  outline-offset: calc(-1 * var(--bambi-accordion-focus-ring-offset));
+}
+
+[data-bambi-accordion-content] {
+  color: var(--bambi-accordion-content-color);
+  padding: var(--bambi-accordion-content-padding-y) var(--bambi-accordion-content-padding-x);
+}
+
+[data-bambi-accordion-content][hidden] {
+  display: none;
+}
+
+[data-bambi-accordion-trigger][data-disabled="true"],
+[data-bambi-accordion-item][data-disabled="true"],
+[data-bambi-accordion][data-disabled="true"] [data-bambi-accordion-trigger] {
+  cursor: not-allowed;
+  opacity: var(--bambi-accordion-disabled-opacity);
+}
