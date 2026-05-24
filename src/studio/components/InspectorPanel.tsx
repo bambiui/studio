@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { StudioComponentDefinition } from "../registry/components";
+import { getContrastReport } from "../theme/contrast";
 import { isValidHexColor } from "../theme/generator";
 import { themePresets } from "../theme/presets";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
@@ -35,6 +36,10 @@ export function InspectorPanel({
         )
         .map((token) => token.id)
     : (selectedComponent?.tokenIds ?? []);
+  const contrastReport = getContrastReport(
+    tokenOverrides,
+    editableTokenDefaults,
+  );
 
   return (
     <aside className="w-full shrink-0 border-t border-white/10 bg-[#080d1a] p-5 xl:w-80 xl:border-l xl:border-t-0">
@@ -97,6 +102,43 @@ export function InspectorPanel({
         >
           Generate theme
         </button>
+      </section>
+
+      <section className="mb-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+        <h3 className="text-sm font-semibold text-white">Contrast report</h3>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          OKLCH lightness farkına göre hızlı okunabilirlik sinyali.
+        </p>
+        <div className="mt-4 space-y-2">
+          {contrastReport.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-2xl border border-white/10 bg-black/20 p-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-slate-100">
+                  {item.label}
+                </span>
+                <span
+                  className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                    item.rating === "strong"
+                      ? "bg-emerald-500/20 text-emerald-200"
+                      : item.rating === "moderate"
+                        ? "bg-amber-500/20 text-amber-200"
+                        : item.rating === "weak"
+                          ? "bg-red-500/20 text-red-200"
+                          : "bg-white/10 text-slate-400"
+                  }`}
+                >
+                  {item.rating}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Score: {item.score === null ? "n/a" : item.score.toFixed(0)}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
