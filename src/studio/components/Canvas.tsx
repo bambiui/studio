@@ -18,6 +18,7 @@ interface CanvasItem {
   componentId: string;
   x: number;
   y: number;
+  width?: number;
 }
 
 interface ActiveDrag {
@@ -37,6 +38,7 @@ export function Canvas({
   );
   const [viewMode, setViewMode] = useState<"all" | "selected">("all");
   const [items, setItems] = useState<CanvasItem[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [hasLoadedItems, setHasLoadedItems] = useState(false);
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const visibleComponents =
@@ -61,26 +63,31 @@ export function Canvas({
   }, [hasLoadedItems, items]);
 
   const addSelectedToBoard = () => {
+    const itemId = `item-${Date.now()}`;
     setCanvasMode("board");
+    setSelectedItemId(itemId);
     setItems((current) => [
       ...current,
       {
-        id: `item-${Date.now()}`,
+        id: itemId,
         componentId: selectedComponentId,
         x: 32 + current.length * 24,
         y: 32 + current.length * 24,
+        width: 384,
       },
     ]);
   };
 
-  const moveItem = (itemId: string, x: number, y: number) => {
+  const updateItem = (itemId: string, updates: Partial<CanvasItem>) => {
     setItems((current) =>
       current.map((item) =>
-        item.id === itemId
-          ? { ...item, x: Math.max(0, x), y: Math.max(0, y) }
-          : item,
+        item.id === itemId ? { ...item, ...updates } : item,
       ),
     );
+  };
+
+  const moveItem = (itemId: string, x: number, y: number) => {
+    updateItem(itemId, { x: Math.max(0, x), y: Math.max(0, y) });
   };
 
   const handleBoardPointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -182,15 +189,25 @@ export function Canvas({
           <CanvasBoard
             boardRef={boardRef}
             items={items}
-            selectedComponentId={selectedComponentId}
+            selectedItemId={selectedItemId}
             previewStyle={previewStyle}
-            onSelectComponent={onSelectComponent}
-            onClear={() => setItems([])}
-            onRemove={(itemId) =>
+            onSelectItem={(itemId, componentId) => {
+              setSelectedItemId(itemId);
+              onSelectComponent(componentId);
+            }}
+            onClear={() => {
+              setItems([]);
+              setSelectedItemId(null);
+            }}
+            onResize={(itemId, width) => updateItem(itemId, { width })}
+            onRemove={(itemId) => {
               setItems((current) =>
                 current.filter((item) => item.id !== itemId),
-              )
-            }
+              );
+              setSelectedItemId((current) =>
+                current === itemId ? null : current,
+              );
+            }}
             onPointerMove={handleBoardPointerMove}
             onPointerUp={() => setActiveDrag(null)}
             onStartDrag={(itemId, offsetX, offsetY) =>
@@ -206,10 +223,11 @@ export function Canvas({
 interface CanvasBoardProps {
   boardRef: RefObject<HTMLDivElement | null>;
   items: CanvasItem[];
-  selectedComponentId: string;
+  selectedItemId: string | null;
   previewStyle: StudioStyle;
-  onSelectComponent: (componentId: string) => void;
+  onSelectItem: (itemId: string, componentId: string) => void;
   onClear: () => void;
+  onResize: (itemId: string, width: number) => void;
   onRemove: (itemId: string) => void;
   onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerUp: () => void;
@@ -219,15 +237,19 @@ interface CanvasBoardProps {
 function CanvasBoard({
   boardRef,
   items,
-  selectedComponentId,
+  selectedItemId,
   previewStyle,
-  onSelectComponent,
+  onSelectItem,
   onClear,
+  onResize,
   onRemove,
   onPointerMove,
   onPointerUp,
   onStartDrag,
 }: CanvasBoardProps) {
+  const selectedItem = items.find((item) => item.id === selectedItemId);
+  const selectedWidth = selectedItem?.width ?? 384;
+
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2">
@@ -237,13 +259,32 @@ function CanvasBoard({
             Add selected components, then drag each item by its handle.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onClear}
-          className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10"
-        >
-          Clear board
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            Width
+            <input
+              type="range"
+              min="260"
+              max="640"
+              step="20"
+              disabled={!selectedItem}
+              value={selectedWidth}
+              onChange={(event) =>
+                selectedItem &&
+                onResize(selectedItem.id, Number(event.target.value))
+              }
+              className="w-28 accent-violet-400 disabled:opacity-40"
+            />
+            <span className="w-10 text-right">{selectedWidth}px</span>
+          </label>
+          <button
+            type="button"
+            onClick={onClear}
+            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+          >
+            Clear board
+          </button>
+        </div>
       </div>
       <div
         ref={boardRef}
@@ -262,23 +303,27 @@ function CanvasBoard({
             (candidate) => candidate.id === item.componentId,
           );
           if (!component) return null;
-          const isSelected = item.componentId === selectedComponentId;
+          const isSelected = item.id === selectedItemId;
+          const width = item.width ?? 384;
 
           return (
             <div
               key={item.id}
-              className={`absolute w-[min(24rem,calc(100%-2rem))] rounded-2xl border bg-[#080d1a] p-2 shadow-2xl shadow-black/30 ${
+              className={`absolute max-w-[calc(100%-2rem)] rounded-2xl border bg-[#080d1a] p-2 shadow-2xl shadow-black/30 ${
                 isSelected ? "border-violet-400" : "border-white/10"
               }`}
-              style={{ transform: `translate(${item.x}px, ${item.y}px)` }}
+              style={{
+                width,
+                transform: `translate(${item.x}px, ${item.y}px)`,
+              }}
             >
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => onSelectComponent(component.id)}
+                onClick={() => onSelectItem(item.id, component.id)}
                 onPointerDown={(event) => {
                   event.currentTarget.setPointerCapture(event.pointerId);
-                  onSelectComponent(component.id);
+                  onSelectItem(item.id, component.id);
                   onStartDrag(
                     item.id,
                     event.nativeEvent.offsetX,
