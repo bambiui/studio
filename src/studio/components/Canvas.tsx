@@ -1,5 +1,6 @@
 import type { PointerEvent, RefObject } from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CANVAS_STORAGE_KEY } from "../constants";
 import {
   studioComponents,
   type StudioComponentDefinition,
@@ -36,6 +37,7 @@ export function Canvas({
   );
   const [viewMode, setViewMode] = useState<"all" | "selected">("all");
   const [items, setItems] = useState<CanvasItem[]>([]);
+  const [hasLoadedItems, setHasLoadedItems] = useState(false);
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const visibleComponents =
     viewMode === "selected"
@@ -43,6 +45,20 @@ export function Canvas({
           (component) => component.id === selectedComponentId,
         )
       : studioComponents;
+
+  useEffect(() => {
+    try {
+      const storedItems = window.localStorage.getItem(CANVAS_STORAGE_KEY);
+      if (storedItems) setItems(JSON.parse(storedItems) as CanvasItem[]);
+    } finally {
+      setHasLoadedItems(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedItems) return;
+    window.localStorage.setItem(CANVAS_STORAGE_KEY, JSON.stringify(items));
+  }, [hasLoadedItems, items]);
 
   const addSelectedToBoard = () => {
     setCanvasMode("board");

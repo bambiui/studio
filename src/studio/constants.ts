@@ -2,6 +2,7 @@ import type { TokenOverrides } from "./tokens/defaults";
 import type { PreviewScheme } from "./types";
 
 export const STORAGE_KEY = "bambiui-studio-theme";
+export const CANVAS_STORAGE_KEY = "bambiui-studio-canvas";
 
 export const PREVIEW_SCHEMES: Record<PreviewScheme, TokenOverrides> = {
   light: {},
