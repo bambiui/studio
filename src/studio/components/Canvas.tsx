@@ -205,6 +205,9 @@ export function Canvas({
               if (nextItems[0]) onSelectComponent(nextItems[0].componentId);
             }}
             onResize={(itemId, width) => updateItem(itemId, { width })}
+            onReorder={(itemId, direction) => {
+              setItems((current) => reorderItems(current, itemId, direction));
+            }}
             onRemove={(itemId) => {
               setItems((current) =>
                 current.filter((item) => item.id !== itemId),
@@ -225,6 +228,24 @@ export function Canvas({
   );
 }
 
+function reorderItems(
+  items: CanvasItem[],
+  itemId: string,
+  direction: "forward" | "backward",
+): CanvasItem[] {
+  const index = items.findIndex((item) => item.id === itemId);
+  if (index === -1) return items;
+
+  const targetIndex = direction === "forward" ? index + 1 : index - 1;
+  if (targetIndex < 0 || targetIndex >= items.length) return items;
+
+  const nextItems = [...items];
+  const [item] = nextItems.splice(index, 1);
+  if (!item) return items;
+  nextItems.splice(targetIndex, 0, item);
+  return nextItems;
+}
+
 interface CanvasBoardProps {
   boardRef: RefObject<HTMLDivElement | null>;
   items: CanvasItem[];
@@ -234,6 +255,7 @@ interface CanvasBoardProps {
   onClear: () => void;
   onImportItems: (items: CanvasItem[]) => void;
   onResize: (itemId: string, width: number) => void;
+  onReorder: (itemId: string, direction: "forward" | "backward") => void;
   onRemove: (itemId: string) => void;
   onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerUp: () => void;
@@ -249,6 +271,7 @@ function CanvasBoard({
   onClear,
   onImportItems,
   onResize,
+  onReorder,
   onRemove,
   onPointerMove,
   onPointerUp,
@@ -350,6 +373,64 @@ function CanvasBoard({
           </button>
         </div>
       </div>
+      {items.length > 0 ? (
+        <div className="mb-3 grid gap-2 rounded-2xl border border-white/10 bg-black/20 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Layers
+            </h4>
+            <span className="text-xs text-slate-600">
+              Front is rendered last
+            </span>
+          </div>
+          <div className="grid gap-2">
+            {items.map((item, index) => {
+              const component = studioComponents.find(
+                (candidate) => candidate.id === item.componentId,
+              );
+              const isSelected = item.id === selectedItemId;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
+                    isSelected
+                      ? "border-violet-400 bg-violet-500/10"
+                      : "border-white/10 bg-white/[0.03]"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      component && onSelectItem(item.id, component.id)
+                    }
+                    className="min-w-0 flex-1 text-left text-xs font-medium text-slate-200"
+                  >
+                    <span className="mr-2 text-slate-500">{index + 1}</span>
+                    {component?.name ?? item.componentId}
+                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onReorder(item.id, "backward")}
+                      className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onReorder(item.id, "forward")}
+                      className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                    >
+                      Front
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
       <div
         ref={boardRef}
         onPointerMove={onPointerMove}
