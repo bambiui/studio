@@ -2,6 +2,8 @@
 
 BambiUI Studio is a visual theme and component playground for the BambiUI platform.
 
+The shell follows the archived Studio structure from `platform/apps/_archived/studio`: a left drawer, `#canvas` / `#canvas-transform` workspace, and right token drawer. The color generator is ported from the archived builder implementation.
+
 The current MVP lets you preview BambiUI components, override design tokens, generate a theme from a single base color, and export/import the resulting token map.
 
 ## Features
