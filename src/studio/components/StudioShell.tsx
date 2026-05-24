@@ -19,8 +19,25 @@ import { tokenDefinitionMap, type TokenDefinition } from "../tokens/metadata";
 
 type StudioStyle = CSSProperties & Record<`--${string}`, string>;
 type ExportFormat = "css" | "json" | "preset";
+type PreviewScheme = "light" | "dark";
 
 const STORAGE_KEY = "bambiui-studio-theme";
+
+const PREVIEW_SCHEMES: Record<PreviewScheme, TokenOverrides> = {
+  light: {},
+  dark: {
+    "--bambi-background": "oklch(9% 0 0)",
+    "--bambi-foreground": "oklch(97% 0.01 271)",
+    "--bambi-card": "oklch(14% 0.01 271)",
+    "--bambi-card-foreground": "oklch(97% 0.01 271)",
+    "--bambi-muted": "oklch(21% 0.012 271)",
+    "--bambi-border": "oklch(28% 0.014 271)",
+    "--bambi-input": "oklch(36% 0.018 271)",
+    "--bambi-input-background": "oklch(14% 0.01 271)",
+    "--bambi-input-foreground": "oklch(97% 0.01 271)",
+    "--bambi-input-placeholder": "oklch(68% 0.018 271)",
+  },
+};
 
 export function StudioShell() {
   const [selectedComponentId, setSelectedComponentId] = useState(
@@ -29,6 +46,7 @@ export function StudioShell() {
   const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
+  const [previewScheme, setPreviewScheme] = useState<PreviewScheme>("light");
 
   useEffect(() => {
     try {
@@ -55,8 +73,9 @@ export function StudioShell() {
   );
 
   const previewStyle = useMemo(
-    () => tokenOverrides as StudioStyle,
-    [tokenOverrides],
+    () =>
+      ({ ...PREVIEW_SCHEMES[previewScheme], ...tokenOverrides }) as StudioStyle,
+    [previewScheme, tokenOverrides],
   );
 
   const updateToken = (tokenId: string, value: string) => {
@@ -92,6 +111,8 @@ export function StudioShell() {
       <main className="flex min-w-0 flex-1 flex-col">
         <TopBar
           tokenCount={Object.keys(tokenOverrides).length}
+          previewScheme={previewScheme}
+          onChangePreviewScheme={setPreviewScheme}
           onOpenExport={() => setIsExportOpen(true)}
         />
         <Canvas
@@ -118,10 +139,17 @@ export function StudioShell() {
 
 interface TopBarProps {
   tokenCount: number;
+  previewScheme: PreviewScheme;
+  onChangePreviewScheme: (scheme: PreviewScheme) => void;
   onOpenExport: () => void;
 }
 
-function TopBar({ tokenCount, onOpenExport }: TopBarProps) {
+function TopBar({
+  tokenCount,
+  previewScheme,
+  onChangePreviewScheme,
+  onOpenExport,
+}: TopBarProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#11172a]/95 px-6 backdrop-blur">
       <div>
@@ -131,6 +159,22 @@ function TopBar({ tokenCount, onOpenExport }: TopBarProps) {
         <h1 className="text-lg font-semibold text-white">Studio</h1>
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-300">
+        <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 sm:flex">
+          {(["light", "dark"] as const).map((scheme) => (
+            <button
+              key={scheme}
+              type="button"
+              onClick={() => onChangePreviewScheme(scheme)}
+              className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition ${
+                previewScheme === scheme
+                  ? "bg-violet-500 text-white"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              {scheme}
+            </button>
+          ))}
+        </div>
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
           {tokenCount} override
         </span>
