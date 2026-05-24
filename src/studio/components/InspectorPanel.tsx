@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { StudioComponentDefinition } from "../registry/components";
 import { isValidHexColor } from "../theme/generator";
+import { themePresets } from "../theme/presets";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import { tokenDefinitionMap } from "../tokens/metadata";
 import { TokenValueControl } from "./TokenValueControl";
@@ -58,6 +59,23 @@ export function InspectorPanel({
             className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
             placeholder="#7c3aed"
           />
+        </div>
+        <div className="mt-3 grid grid-cols-5 gap-2">
+          {themePresets.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              title={preset.name}
+              onClick={() => {
+                setBaseColor(preset.color);
+                onApplyGeneratedTheme(preset.color);
+              }}
+              className="flex h-9 items-center justify-center rounded-xl border border-white/10 text-[10px] font-medium text-white transition hover:border-white/30"
+              style={{ background: preset.color }}
+            >
+              {preset.name.slice(0, 1)}
+            </button>
+          ))}
         </div>
         <button
           type="button"
