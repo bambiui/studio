@@ -37,6 +37,7 @@ export function Canvas({
     "showcase",
   );
   const [viewMode, setViewMode] = useState<"all" | "selected">("all");
+  const [zoom, setZoom] = useState(1);
   const [items, setItems] = useState<CanvasItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [hasLoadedItems, setHasLoadedItems] = useState(false);
@@ -95,8 +96,8 @@ export function Canvas({
     const rect = boardRef.current.getBoundingClientRect();
     moveItem(
       activeDrag.itemId,
-      event.clientX - rect.left - activeDrag.offsetX,
-      event.clientY - rect.top - activeDrag.offsetY,
+      (event.clientX - rect.left) / zoom - activeDrag.offsetX,
+      (event.clientY - rect.top) / zoom - activeDrag.offsetY,
     );
   };
 
@@ -191,6 +192,8 @@ export function Canvas({
             items={items}
             selectedItemId={selectedItemId}
             previewStyle={previewStyle}
+            zoom={zoom}
+            onZoomChange={setZoom}
             onSelectItem={(itemId, componentId) => {
               setSelectedItemId(itemId);
               onSelectComponent(componentId);
@@ -272,6 +275,8 @@ interface CanvasBoardProps {
   items: CanvasItem[];
   selectedItemId: string | null;
   previewStyle: StudioStyle;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
   onSelectItem: (itemId: string, componentId: string) => void;
   onClear: () => void;
   onImportItems: (items: CanvasItem[]) => void;
@@ -290,6 +295,8 @@ function CanvasBoard({
   items,
   selectedItemId,
   previewStyle,
+  zoom,
+  onZoomChange,
   onSelectItem,
   onClear,
   onImportItems,
@@ -304,6 +311,7 @@ function CanvasBoard({
 }: CanvasBoardProps) {
   const selectedItem = items.find((item) => item.id === selectedItemId);
   const selectedWidth = selectedItem?.width ?? 384;
+  const zoomPercent = Math.round(zoom * 100);
 
   const exportBoard = () => {
     const file = new Blob([JSON.stringify({ version: 1, items }, null, 2)], {
@@ -353,6 +361,26 @@ function CanvasBoard({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            Zoom
+            <input
+              type="range"
+              min="0.5"
+              max="1.5"
+              step="0.1"
+              value={zoom}
+              onChange={(event) => onZoomChange(Number(event.target.value))}
+              className="w-24 accent-violet-400"
+            />
+            <span className="w-10 text-right">{zoomPercent}%</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => onZoomChange(1)}
+            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+          >
+            100%
+          </button>
           <label className="flex items-center gap-2 text-xs text-slate-400">
             Width
             <input
@@ -492,7 +520,8 @@ function CanvasBoard({
               }`}
               style={{
                 width,
-                transform: `translate(${item.x}px, ${item.y}px)`,
+                transform: `translate(${item.x * zoom}px, ${item.y * zoom}px) scale(${zoom})`,
+                transformOrigin: "top left",
               }}
             >
               <div
@@ -524,11 +553,14 @@ function CanvasBoard({
                 onPointerDown={(event) => {
                   event.currentTarget.setPointerCapture(event.pointerId);
                   onSelectItem(item.id, component.id);
-                  onStartDrag(
-                    item.id,
-                    event.nativeEvent.offsetX,
-                    event.nativeEvent.offsetY,
-                  );
+                  const rect = boardRef.current?.getBoundingClientRect();
+                  const pointerX = rect
+                    ? (event.clientX - rect.left) / zoom
+                    : item.x;
+                  const pointerY = rect
+                    ? (event.clientY - rect.top) / zoom
+                    : item.y;
+                  onStartDrag(item.id, pointerX - item.x, pointerY - item.y);
                 }}
                 className="mb-2 flex cursor-grab items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2 text-left active:cursor-grabbing"
               >
