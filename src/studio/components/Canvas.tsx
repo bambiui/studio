@@ -199,6 +199,11 @@ export function Canvas({
               setItems([]);
               setSelectedItemId(null);
             }}
+            onImportItems={(nextItems) => {
+              setItems(nextItems);
+              setSelectedItemId(nextItems[0]?.id ?? null);
+              if (nextItems[0]) onSelectComponent(nextItems[0].componentId);
+            }}
             onResize={(itemId, width) => updateItem(itemId, { width })}
             onRemove={(itemId) => {
               setItems((current) =>
@@ -227,6 +232,7 @@ interface CanvasBoardProps {
   previewStyle: StudioStyle;
   onSelectItem: (itemId: string, componentId: string) => void;
   onClear: () => void;
+  onImportItems: (items: CanvasItem[]) => void;
   onResize: (itemId: string, width: number) => void;
   onRemove: (itemId: string) => void;
   onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
@@ -241,6 +247,7 @@ function CanvasBoard({
   previewStyle,
   onSelectItem,
   onClear,
+  onImportItems,
   onResize,
   onRemove,
   onPointerMove,
@@ -249,6 +256,43 @@ function CanvasBoard({
 }: CanvasBoardProps) {
   const selectedItem = items.find((item) => item.id === selectedItemId);
   const selectedWidth = selectedItem?.width ?? 384;
+
+  const exportBoard = () => {
+    const file = new Blob([JSON.stringify({ version: 1, items }, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "bambiui-studio-canvas.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importBoard = async (file: File) => {
+    const source = await file.text();
+    const payload = JSON.parse(source) as
+      | { items?: CanvasItem[] }
+      | CanvasItem[];
+    const nextItems = Array.isArray(payload) ? payload : payload.items;
+    if (!Array.isArray(nextItems)) return;
+
+    onImportItems(
+      nextItems
+        .filter((item) =>
+          studioComponents.some(
+            (component) => component.id === item.componentId,
+          ),
+        )
+        .map((item, index) => ({
+          id: item.id || `imported-${Date.now()}-${index}`,
+          componentId: item.componentId,
+          x: Number.isFinite(item.x) ? item.x : 32,
+          y: Number.isFinite(item.y) ? item.y : 32,
+          width: Number.isFinite(item.width) ? item.width : 384,
+        })),
+    );
+  };
 
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
@@ -276,6 +320,26 @@ function CanvasBoard({
               className="w-28 accent-violet-400 disabled:opacity-40"
             />
             <span className="w-10 text-right">{selectedWidth}px</span>
+          </label>
+          <button
+            type="button"
+            onClick={exportBoard}
+            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+          >
+            Export board
+          </button>
+          <label className="cursor-pointer rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/10">
+            Import board
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void importBoard(file);
+                event.currentTarget.value = "";
+              }}
+            />
           </label>
           <button
             type="button"
