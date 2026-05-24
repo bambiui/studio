@@ -1,6 +1,8 @@
 export type TokenOverrides = Record<string, string>;
 
 export const editableTokenDefaults: TokenOverrides = {
+  "--bambi-background": "oklch(97% 0.01 271)",
+  "--bambi-foreground": "oklch(9% 0 0)",
   "--bambi-primary": "oklch(55% 0.22 271)",
   "--bambi-primary-foreground": "oklch(100% 0 0)",
   "--bambi-secondary": "oklch(95% 0.008 271)",
@@ -23,6 +25,7 @@ export const editableTokenDefaults: TokenOverrides = {
   "--bambi-radius-md": "0.5rem",
   "--bambi-radius-lg": "0.75rem",
   "--bambi-radius-full": "9999px",
+  "--bambi-space-4": "1rem",
   "--bambi-shadow-sm": "0 1px 2px 0 oklch(0% 0 0 / 0.05)",
   "--bambi-state-disabled-opacity": "0.5",
 };

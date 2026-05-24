@@ -11,6 +11,20 @@ export interface TokenDefinition {
 
 export const tokenDefinitions: TokenDefinition[] = [
   {
+    id: "--bambi-background",
+    label: "Background",
+    group: "Semantic",
+    kind: "color",
+    description: "Default application and preview background color.",
+  },
+  {
+    id: "--bambi-foreground",
+    label: "Foreground",
+    group: "Semantic",
+    kind: "color",
+    description: "Default text and icon color.",
+  },
+  {
     id: "--bambi-primary",
     label: "Primary",
     group: "Semantic",
@@ -163,6 +177,13 @@ export const tokenDefinitions: TokenDefinition[] = [
     group: "Primitive",
     kind: "radius",
     description: "Fully rounded controls.",
+  },
+  {
+    id: "--bambi-space-4",
+    label: "Space 4",
+    group: "Primitive",
+    kind: "space",
+    description: "Default medium spacing token.",
   },
   {
     id: "--bambi-shadow-sm",

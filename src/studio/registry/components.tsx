@@ -14,8 +14,17 @@ import {
   CheckboxIndicator,
   CheckboxLabel,
 } from "@/src/components/ui/checkbox";
+import { Code } from "@/src/components/ui/code";
 import { Input } from "@/src/components/ui/input";
+import { Separator } from "@/src/components/ui/separator";
+import {
+  Slider,
+  SliderRange,
+  SliderThumb,
+  SliderTrack,
+} from "@/src/components/ui/slider";
 import { Switch, SwitchLabel, SwitchThumb } from "@/src/components/ui/switch";
+import { Textarea } from "@/src/components/ui/textarea";
 
 export type ComponentCategory = "Actions" | "Inputs" | "Display";
 
@@ -33,7 +42,8 @@ export const studioComponents: StudioComponentDefinition[] = [
     id: "button",
     name: "Button",
     category: "Actions",
-    description: "Primary user actions with intent, size, loading and disabled states.",
+    description:
+      "Primary user actions with intent, size, loading and disabled states.",
     tokenIds: [
       "--bambi-intent-primary-bg",
       "--bambi-intent-primary-fg",
@@ -54,7 +64,8 @@ export const studioComponents: StudioComponentDefinition[] = [
     id: "card",
     name: "Card",
     category: "Display",
-    description: "A surface for grouped content, actions and supporting metadata.",
+    description:
+      "A surface for grouped content, actions and supporting metadata.",
     tokenIds: [
       "--bambi-card",
       "--bambi-card-foreground",
@@ -66,10 +77,14 @@ export const studioComponents: StudioComponentDefinition[] = [
       <Card size="md" className="max-w-sm">
         <CardHeader>
           <CardTitle>Theme Preview</CardTitle>
-          <CardDescription>Inspect how surfaces react to token overrides.</CardDescription>
+          <CardDescription>
+            Inspect how surfaces react to token overrides.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Cards inherit semantic surface, border, radius and shadow tokens.</p>
+          <p>
+            Cards inherit semantic surface, border, radius and shadow tokens.
+          </p>
         </CardContent>
         <CardFooter>
           <Button size="sm">Apply</Button>
@@ -81,7 +96,8 @@ export const studioComponents: StudioComponentDefinition[] = [
     id: "input",
     name: "Input",
     category: "Inputs",
-    description: "Text input with background, border, ring and placeholder tokens.",
+    description:
+      "Text input with background, border, ring and placeholder tokens.",
     tokenIds: [
       "--bambi-input-background",
       "--bambi-input-foreground",
@@ -93,6 +109,27 @@ export const studioComponents: StudioComponentDefinition[] = [
       <div className="grid max-w-sm gap-3">
         <Input placeholder="studio@bambiui.com" />
         <Input invalid placeholder="Invalid state" />
+      </div>
+    ),
+  },
+  {
+    id: "textarea",
+    name: "Textarea",
+    category: "Inputs",
+    description:
+      "Multi-line input using shared input surface and focus tokens.",
+    tokenIds: [
+      "--bambi-input-background",
+      "--bambi-input-foreground",
+      "--bambi-input-placeholder",
+      "--bambi-input",
+      "--bambi-radius-md",
+      "--bambi-ring",
+    ],
+    preview: (
+      <div className="grid max-w-sm gap-3">
+        <Textarea placeholder="Describe the generated theme..." resize="none" />
+        <Textarea invalid placeholder="Invalid feedback" resize="none" />
       </div>
     ),
   },
@@ -119,6 +156,43 @@ export const studioComponents: StudioComponentDefinition[] = [
     ),
   },
   {
+    id: "code",
+    name: "Code",
+    category: "Display",
+    description: "Inline and block code snippets for documentation surfaces.",
+    tokenIds: [
+      "--bambi-muted",
+      "--bambi-foreground",
+      "--bambi-radius-sm",
+      "--bambi-space-4",
+    ],
+    preview: (
+      <div className="grid gap-3">
+        <p>
+          Install with <Code>npx bambiui add button</Code>
+        </p>
+        <Code variant="block">{`const theme = createBambiTheme(tokens);`}</Code>
+      </div>
+    ),
+  },
+  {
+    id: "separator",
+    name: "Separator",
+    category: "Display",
+    description: "A visual divider that follows the semantic border token.",
+    tokenIds: ["--bambi-border", "--bambi-space-4"],
+    preview: (
+      <div className="grid max-w-sm gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <span>Light</span>
+          <Separator />
+          <span>Dark</span>
+        </div>
+        <Separator decorative />
+      </div>
+    ),
+  },
+  {
     id: "switch",
     name: "Switch",
     category: "Inputs",
@@ -140,6 +214,48 @@ export const studioComponents: StudioComponentDefinition[] = [
           <SwitchThumb />
           <SwitchLabel>Publish to gallery</SwitchLabel>
         </Switch>
+      </div>
+    ),
+  },
+  {
+    id: "slider",
+    name: "Slider",
+    category: "Inputs",
+    description: "Range input for numeric token and setting controls.",
+    tokenIds: [
+      "--bambi-primary",
+      "--bambi-secondary",
+      "--bambi-background",
+      "--bambi-ring",
+      "--bambi-radius-full",
+      "--bambi-shadow-sm",
+    ],
+    preview: (
+      <div className="grid gap-4">
+        <Slider
+          defaultValue={[64]}
+          min={0}
+          max={100}
+          step={1}
+          aria-label="Opacity"
+        >
+          <SliderTrack>
+            <SliderRange />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
+        <Slider
+          defaultValue={[28]}
+          min={0}
+          max={100}
+          step={1}
+          aria-label="Radius"
+        >
+          <SliderTrack>
+            <SliderRange />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
       </div>
     ),
   },
@@ -170,4 +286,8 @@ export const studioComponents: StudioComponentDefinition[] = [
   },
 ];
 
-export const componentCategories: ComponentCategory[] = ["Actions", "Inputs", "Display"];
+export const componentCategories: ComponentCategory[] = [
+  "Actions",
+  "Inputs",
+  "Display",
+];
