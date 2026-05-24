@@ -118,7 +118,7 @@ export function StudioShell() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0b1020] text-slate-100">
+    <div className="flex min-h-screen flex-col bg-[#0b1020] text-slate-100 xl:flex-row">
       <ComponentExplorer
         selectedComponentId={selectedComponent?.id ?? ""}
         onSelectComponent={setSelectedComponentId}
@@ -476,7 +476,7 @@ function InspectorPanel({
   const [baseColor, setBaseColor] = useState("#7c3aed");
   const canGenerateTheme = isValidHexColor(baseColor);
   return (
-    <aside className="hidden w-80 shrink-0 border-l border-white/10 bg-[#080d1a] p-5 xl:block">
+    <aside className="w-full shrink-0 border-t border-white/10 bg-[#080d1a] p-5 xl:w-80 xl:border-l xl:border-t-0">
       <div className="mb-6">
         <p className="text-xs font-medium uppercase tracking-[0.24em] text-violet-300">
           Inspector
