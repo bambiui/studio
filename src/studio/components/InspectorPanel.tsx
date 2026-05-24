@@ -3,7 +3,7 @@ import type { StudioComponentDefinition } from "../registry/components";
 import { isValidHexColor } from "../theme/generator";
 import { themePresets } from "../theme/presets";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
-import { tokenDefinitionMap } from "../tokens/metadata";
+import { tokenDefinitionMap, tokenDefinitions } from "../tokens/metadata";
 import { TokenValueControl } from "./TokenValueControl";
 
 interface InspectorPanelProps {
@@ -22,7 +22,19 @@ export function InspectorPanel({
   onApplyGeneratedTheme,
 }: InspectorPanelProps) {
   const [baseColor, setBaseColor] = useState("#7c3aed");
+  const [tokenQuery, setTokenQuery] = useState("");
   const canGenerateTheme = isValidHexColor(baseColor);
+  const normalizedTokenQuery = tokenQuery.trim().toLowerCase();
+  const displayedTokenIds = normalizedTokenQuery
+    ? tokenDefinitions
+        .filter((token) =>
+          [token.id, token.label, token.group, token.description]
+            .join(" ")
+            .toLowerCase()
+            .includes(normalizedTokenQuery),
+        )
+        .map((token) => token.id)
+    : (selectedComponent?.tokenIds ?? []);
 
   return (
     <aside className="w-full shrink-0 border-t border-white/10 bg-[#080d1a] p-5 xl:w-80 xl:border-l xl:border-t-0">
@@ -102,8 +114,19 @@ export function InspectorPanel({
           Token değerlerini düzenle; değişiklikler canvas preview alanına anında
           uygulanır.
         </p>
+        <label className="mt-4 block">
+          <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Token search
+          </span>
+          <input
+            value={tokenQuery}
+            onChange={(event) => setTokenQuery(event.target.value)}
+            placeholder="Search all tokens..."
+            className="w-full rounded-2xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+          />
+        </label>
         <div className="mt-4 space-y-3">
-          {selectedComponent?.tokenIds.map((tokenId) => {
+          {displayedTokenIds.map((tokenId) => {
             const token = tokenDefinitionMap.get(tokenId);
 
             return (
@@ -137,6 +160,11 @@ export function InspectorPanel({
               </div>
             );
           })}
+          {displayedTokenIds.length === 0 ? (
+            <p className="rounded-2xl border border-white/10 bg-black/20 p-3 text-sm text-slate-500">
+              No tokens found.
+            </p>
+          ) : null}
         </div>
       </section>
     </aside>
