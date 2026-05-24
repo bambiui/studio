@@ -4,7 +4,11 @@ import { getContrastReport } from "../theme/contrast";
 import { isValidHexColor } from "../theme/generator";
 import { themePresets } from "../theme/presets";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
-import { tokenDefinitionMap, tokenDefinitions } from "../tokens/metadata";
+import {
+  tokenDefinitionMap,
+  tokenDefinitions,
+  type TokenGroup,
+} from "../tokens/metadata";
 import { TokenValueControl } from "./TokenValueControl";
 
 interface InspectorPanelProps {
@@ -24,18 +28,34 @@ export function InspectorPanel({
 }: InspectorPanelProps) {
   const [baseColor, setBaseColor] = useState("#7c3aed");
   const [tokenQuery, setTokenQuery] = useState("");
+  const [activeTokenGroup, setActiveTokenGroup] = useState<TokenGroup | "All">(
+    "All",
+  );
   const canGenerateTheme = isValidHexColor(baseColor);
   const normalizedTokenQuery = tokenQuery.trim().toLowerCase();
-  const displayedTokenIds = normalizedTokenQuery
-    ? tokenDefinitions
-        .filter((token) =>
-          [token.id, token.label, token.group, token.description]
-            .join(" ")
-            .toLowerCase()
-            .includes(normalizedTokenQuery),
-        )
-        .map((token) => token.id)
+  const baseTokenIds = normalizedTokenQuery
+    ? tokenDefinitions.map((token) => token.id)
     : (selectedComponent?.tokenIds ?? []);
+  const tokenGroups: Array<TokenGroup | "All"> = [
+    "All",
+    "Primitive",
+    "Semantic",
+    "Intent",
+    "Component",
+  ];
+  const displayedTokenIds = baseTokenIds.filter((tokenId) => {
+    const token = tokenDefinitionMap.get(tokenId);
+    if (!token) return false;
+    if (activeTokenGroup !== "All" && token.group !== activeTokenGroup) {
+      return false;
+    }
+    if (!normalizedTokenQuery) return true;
+
+    return [token.id, token.label, token.group, token.description]
+      .join(" ")
+      .toLowerCase()
+      .includes(normalizedTokenQuery);
+  });
   const contrastReport = getContrastReport(
     tokenOverrides,
     editableTokenDefaults,
@@ -167,6 +187,22 @@ export function InspectorPanel({
             className="w-full rounded-2xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
           />
         </label>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {tokenGroups.map((group) => (
+            <button
+              key={group}
+              type="button"
+              onClick={() => setActiveTokenGroup(group)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                activeTokenGroup === group
+                  ? "border-violet-400 bg-violet-500/20 text-white"
+                  : "border-white/10 text-slate-400 hover:bg-white/10"
+              }`}
+            >
+              {group}
+            </button>
+          ))}
+        </div>
         <div className="mt-4 space-y-3">
           {displayedTokenIds.map((tokenId) => {
             const token = tokenDefinitionMap.get(tokenId);
