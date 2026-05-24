@@ -471,6 +471,14 @@ function CanvasCard({
         style={previewStyle}
       >
         {component.preview}
+        {component.statePreview ? (
+          <div className="mt-5 border-t border-[var(--bambi-border)] pt-5">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[var(--bambi-muted-foreground)]">
+              States
+            </p>
+            {component.statePreview}
+          </div>
+        ) : null}
       </div>
     </article>
   );

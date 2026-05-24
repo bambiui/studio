@@ -35,6 +35,7 @@ export interface StudioComponentDefinition {
   description: string;
   tokenIds: string[];
   preview: ReactNode;
+  statePreview?: ReactNode;
 }
 
 export const studioComponents: StudioComponentDefinition[] = [
@@ -57,6 +58,13 @@ export const studioComponents: StudioComponentDefinition[] = [
         <Button variant="secondary">Secondary</Button>
         <Button variant="outline">Outline</Button>
         <Button variant="danger">Danger</Button>
+      </div>
+    ),
+    statePreview: (
+      <div className="flex flex-wrap items-center gap-3">
+        <Button>Default</Button>
+        <Button loading>Loading</Button>
+        <Button disabled>Disabled</Button>
       </div>
     ),
   },
@@ -111,6 +119,13 @@ export const studioComponents: StudioComponentDefinition[] = [
         <Input invalid placeholder="Invalid state" />
       </div>
     ),
+    statePreview: (
+      <div className="grid max-w-sm gap-3">
+        <Input placeholder="Default" />
+        <Input invalid placeholder="Invalid" />
+        <Input disabled placeholder="Disabled" />
+      </div>
+    ),
   },
   {
     id: "textarea",
@@ -132,6 +147,13 @@ export const studioComponents: StudioComponentDefinition[] = [
         <Textarea invalid placeholder="Invalid feedback" resize="none" />
       </div>
     ),
+    statePreview: (
+      <div className="grid max-w-sm gap-3">
+        <Textarea placeholder="Default" resize="none" />
+        <Textarea invalid placeholder="Invalid" resize="none" />
+        <Textarea disabled placeholder="Disabled" resize="none" />
+      </div>
+    ),
   },
   {
     id: "badge",
@@ -151,6 +173,13 @@ export const studioComponents: StudioComponentDefinition[] = [
         <Badge variant="secondary">Secondary</Badge>
         <Badge variant="success">Success</Badge>
         <Badge variant="warning">Warning</Badge>
+        <Badge variant="danger">Danger</Badge>
+      </div>
+    ),
+    statePreview: (
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge>Default</Badge>
+        <Badge variant="outline">Outline</Badge>
         <Badge variant="danger">Danger</Badge>
       </div>
     ),
