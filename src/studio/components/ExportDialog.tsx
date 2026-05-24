@@ -34,6 +34,13 @@ export function ExportDialog({
     if (format === "preset") return serializeThemeAsPreset(exportTokens);
     return serializeThemeAsCss(exportTokens);
   }, [exportTokens, format]);
+  const tokenEntries = useMemo(
+    () =>
+      Object.entries(exportTokens).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    [exportTokens],
+  );
 
   if (!isOpen) return null;
 
@@ -107,6 +114,34 @@ export function ExportDialog({
             />
             Include {previewScheme} preview tokens
           </label>
+        </div>
+
+        <div className="px-5 pb-4">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-white">
+                Export summary
+              </h3>
+              <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-slate-400">
+                {tokenEntries.length} tokens
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {tokenEntries.slice(0, 8).map(([token]) => (
+                <span
+                  key={token}
+                  className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-violet-200"
+                >
+                  {token}
+                </span>
+              ))}
+              {tokenEntries.length > 8 ? (
+                <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-slate-500">
+                  +{tokenEntries.length - 8} more
+                </span>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 px-5 pb-5">
