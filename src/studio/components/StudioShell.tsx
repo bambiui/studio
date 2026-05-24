@@ -8,6 +8,7 @@ import {
   type ComponentCategory,
   type StudioComponentDefinition,
 } from "../registry/components";
+import { createThemeFromBaseColor, isValidHexColor } from "../theme/generator";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import { tokenDefinitionMap } from "../tokens/metadata";
 
@@ -49,6 +50,13 @@ export function StudioShell() {
 
   const resetTokens = () => setTokenOverrides({});
 
+  const applyGeneratedTheme = (baseColor: string) => {
+    setTokenOverrides((current) => ({
+      ...current,
+      ...createThemeFromBaseColor(baseColor),
+    }));
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0b1020] text-slate-100">
       <ComponentExplorer
@@ -68,6 +76,7 @@ export function StudioShell() {
         tokenOverrides={tokenOverrides}
         onUpdateToken={updateToken}
         onResetTokens={resetTokens}
+        onApplyGeneratedTheme={applyGeneratedTheme}
       />
     </div>
   );
@@ -272,6 +281,7 @@ interface InspectorPanelProps {
   tokenOverrides: TokenOverrides;
   onUpdateToken: (tokenId: string, value: string) => void;
   onResetTokens: () => void;
+  onApplyGeneratedTheme: (baseColor: string) => void;
 }
 
 function InspectorPanel({
@@ -279,7 +289,10 @@ function InspectorPanel({
   tokenOverrides,
   onUpdateToken,
   onResetTokens,
+  onApplyGeneratedTheme,
 }: InspectorPanelProps) {
+  const [baseColor, setBaseColor] = useState("#7c3aed");
+  const canGenerateTheme = isValidHexColor(baseColor);
   return (
     <aside className="hidden w-80 shrink-0 border-l border-white/10 bg-[#080d1a] p-5 xl:block">
       <div className="mb-6">
@@ -294,6 +307,36 @@ function InspectorPanel({
             "Canvas üzerinden bir komponent seç."}
         </p>
       </div>
+
+      <section className="mb-4 rounded-3xl border border-violet-400/20 bg-violet-500/10 p-4">
+        <h3 className="text-sm font-semibold text-white">Theme generator</h3>
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          Tek bir base renkten primary scale ve bağlı semantic tokenları üret.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <input
+            type="color"
+            value={canGenerateTheme ? baseColor : "#7c3aed"}
+            onChange={(event) => setBaseColor(event.target.value)}
+            className="h-10 w-12 rounded-xl border border-white/10 bg-transparent p-1"
+            aria-label="Base color"
+          />
+          <input
+            value={baseColor}
+            onChange={(event) => setBaseColor(event.target.value)}
+            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+            placeholder="#7c3aed"
+          />
+        </div>
+        <button
+          type="button"
+          disabled={!canGenerateTheme}
+          onClick={() => onApplyGeneratedTheme(baseColor)}
+          className="mt-3 w-full rounded-xl bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Generate theme
+        </button>
+      </section>
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
         <div className="flex items-center justify-between gap-3">
