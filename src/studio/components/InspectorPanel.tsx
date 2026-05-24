@@ -219,18 +219,35 @@ export function InspectorPanel({
           {displayedTokenIds.map((tokenId) => {
             const token = tokenDefinitionMap.get(tokenId);
 
+            const isOverridden = tokenOverrides[tokenId] !== undefined;
+
             return (
               <div
                 key={tokenId}
-                className="rounded-2xl border border-white/10 bg-black/20 p-3"
+                className={`rounded-2xl border p-3 ${
+                  isOverridden
+                    ? "border-violet-400/40 bg-violet-500/10"
+                    : "border-white/10 bg-black/20"
+                }`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-medium text-slate-100">
                     {token?.label ?? tokenId}
                   </span>
-                  <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] uppercase tracking-wide text-slate-400">
-                    {token?.group ?? "Token"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {isOverridden ? (
+                      <button
+                        type="button"
+                        onClick={() => onUpdateToken(tokenId, "")}
+                        className="rounded-full border border-violet-400/30 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-violet-200 transition hover:bg-violet-500/20"
+                      >
+                        Reset
+                      </button>
+                    ) : null}
+                    <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] uppercase tracking-wide text-slate-400">
+                      {token?.group ?? "Token"}
+                    </span>
+                  </div>
                 </div>
                 <code className="mt-2 block break-all text-xs text-violet-200">
                   {tokenId}
