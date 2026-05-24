@@ -1,123 +1,229 @@
 import type { TokenOverrides } from "../tokens/defaults";
 
-const PRIMARY_SCALE = [
-  ["50", 97, 0.018],
-  ["100", 94, 0.036],
-  ["200", 88, 0.072],
-  ["300", 78, 0.12],
-  ["400", 66, 0.18],
-  ["500", 55, 0.22],
-  ["600", 49, 0.23],
-  ["700", 42, 0.2],
-  ["800", 34, 0.16],
-  ["900", 27, 0.12],
-  ["950", 18, 0.08],
-] as const;
+function toLinear(c: number) {
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+function toGamma(c: number) {
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
+}
+
+function hexToOklch(hex: string): { hue: number; chroma: number } | null {
+  const clean = hex.replace("#", "");
+  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
+
+  const r = toLinear(parseInt(clean.slice(0, 2), 16) / 255);
+  const g = toLinear(parseInt(clean.slice(2, 4), 16) / 255);
+  const b = toLinear(parseInt(clean.slice(4, 6), 16) / 255);
+  const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const a = 1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_;
+  const bv = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_;
+
+  return {
+    chroma: Math.sqrt(a * a + bv * bv),
+    hue: ((Math.atan2(bv, a) * 180) / Math.PI + 360) % 360,
+  };
+}
+
+export function oklchToHex(L: number, C: number, H: number): string {
+  const hRad = (H * Math.PI) / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+  const l = l_ ** 3;
+  const m = m_ ** 3;
+  const s = s_ ** 3;
+  const rl = Math.max(
+    0,
+    Math.min(1, 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+  );
+  const gl = Math.max(
+    0,
+    Math.min(1, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+  );
+  const bl = Math.max(
+    0,
+    Math.min(1, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  );
+  const rv = Math.round(toGamma(rl) * 255);
+  const gv = Math.round(toGamma(gl) * 255);
+  const bv = Math.round(toGamma(bl) * 255);
+
+  return `#${rv.toString(16).padStart(2, "0")}${gv.toString(16).padStart(2, "0")}${bv.toString(16).padStart(2, "0")}`;
+}
+
+function relativeLuminance(L: number, C: number, H: number): number {
+  const hRad = (H * Math.PI) / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+  const l = l_ ** 3;
+  const m = m_ ** 3;
+  const s = s_ ** 3;
+  const r = Math.max(
+    0,
+    Math.min(1, 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+  );
+  const g = Math.max(
+    0,
+    Math.min(1, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+  );
+  const bv = Math.max(
+    0,
+    Math.min(1, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  );
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * bv;
+}
+
+export function bestFg(bgL: number, bgC: number, bgH: number): string {
+  const bgLum = relativeLuminance(bgL, bgC, bgH);
+  const wLum = relativeLuminance(0.98, 0, 0);
+  const hi = Math.max(bgLum, wLum);
+  const lo = Math.min(bgLum, wLum);
+
+  return (hi + 0.05) / (lo + 0.05) >= 4.5 ? "oklch(98% 0 0)" : "oklch(9% 0 0)";
+}
+
+function blendHue(primary: number, def: number): number {
+  return (((def + (primary - 253.83) * 0.12) % 360) + 360) % 360;
+}
+
+function fmt(L: number, C: number, H: number): string {
+  return `oklch(${Math.round(L * 100)}% ${C.toFixed(3)} ${Math.round(H)})`;
+}
+
+const SCALE_STEPS = [
+  "50",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+];
 
 const NEUTRAL_SCALE = [
-  ["50", 97, 0.01],
-  ["100", 95, 0.008],
-  ["200", 90, 0.01],
-  ["300", 83, 0.012],
-  ["400", 68, 0.018],
-  ["500", 55, 0.021],
-  ["600", 45, 0.02],
-  ["700", 36, 0.018],
-  ["800", 28, 0.014],
-  ["900", 21, 0.012],
-  ["950", 9, 0],
+  [0.97, 1],
+  [0.95, 0.8],
+  [0.9, 1],
+  [0.83, 1.2],
+  [0.68, 1.8],
+  [0.55, 2.1],
+  [0.45, 2],
+  [0.36, 1.8],
+  [0.28, 1.4],
+  [0.21, 1.2],
+  [0.09, 0],
 ] as const;
 
-const INTENT_SCALE = [
-  ["50", 97, 0.02],
-  ["100", 93, 0.045],
-  ["200", 86, 0.09],
-  ["300", 78, 0.15],
-  ["400", 71, 0.2],
-  ["500", 65, 0.233],
-  ["600", 58, 0.22],
-  ["700", 49, 0.19],
-  ["800", 40, 0.15],
-  ["900", 32, 0.11],
-  ["950", 22, 0.08],
+const PRIMARY_SCALE = [
+  [0.97, 0.08],
+  [0.94, 0.16],
+  [0.88, 0.33],
+  [0.78, 0.55],
+  [0.66, 0.82],
+  [0.55, 1],
+  [0.49, 1.05],
+  [0.42, 0.91],
+  [0.34, 0.73],
+  [0.27, 0.55],
+  [0.18, 0.36],
+] as const;
+
+const DANGER_SCALE = [
+  [0.97, 0.09],
+  [0.93, 0.19],
+  [0.86, 0.39],
+  [0.78, 0.64],
+  [0.71, 0.86],
+  [0.65, 1],
+  [0.58, 0.94],
+  [0.49, 0.82],
+  [0.4, 0.64],
+  [0.32, 0.47],
+  [0.22, 0.34],
+] as const;
+
+const SUCCESS_SCALE = [
+  [0.97, 0.13],
+  [0.93, 0.28],
+  [0.87, 0.49],
+  [0.8, 0.75],
+  [0.76, 0.88],
+  [0.73, 1],
+  [0.64, 0.93],
+  [0.54, 0.77],
+  [0.43, 0.62],
+  [0.33, 0.46],
+  [0.22, 0.31],
 ] as const;
 
 const WARNING_SCALE = [
-  ["50", 98, 0.025],
-  ["100", 95, 0.055],
-  ["200", 90, 0.09],
-  ["300", 84, 0.125],
-  ["400", 81, 0.145],
-  ["500", 78, 0.159],
-  ["600", 69, 0.15],
-  ["700", 58, 0.13],
-  ["800", 46, 0.1],
-  ["900", 35, 0.075],
-  ["950", 24, 0.055],
+  [0.98, 0.16],
+  [0.95, 0.35],
+  [0.9, 0.57],
+  [0.84, 0.79],
+  [0.81, 0.91],
+  [0.78, 1],
+  [0.69, 0.95],
+  [0.58, 0.82],
+  [0.46, 0.63],
+  [0.35, 0.47],
+  [0.24, 0.35],
 ] as const;
 
-interface RgbColor {
-  red: number;
-  green: number;
-  blue: number;
+function addScale(
+  tokens: TokenOverrides,
+  name: string,
+  hue: number,
+  chroma: number,
+  profile: readonly (readonly [number, number])[],
+) {
+  profile.forEach(([lightness, chromaRatio], index) => {
+    const step = SCALE_STEPS[index];
+    if (!step) return;
+    tokens[`--bambi-${name}-${step}`] = fmt(
+      lightness,
+      chroma * chromaRatio,
+      hue,
+    );
+  });
+}
+
+export function generateColorTokens(
+  hue: number,
+  chroma: number,
+  base: number,
+): TokenOverrides {
+  const gc = 0.0015 + (base / 100) * (0.02 - 0.0015);
+  const dHL = blendHue(hue, 25.74);
+  const sH = blendHue(hue, 150.81);
+  const wHL = blendHue(hue, 72.33);
+  const tokens: TokenOverrides = {};
+
+  addScale(tokens, "neutral", hue, gc, NEUTRAL_SCALE);
+  addScale(tokens, "primary", hue, chroma, PRIMARY_SCALE);
+  addScale(tokens, "danger", dHL, 0.233, DANGER_SCALE);
+  addScale(tokens, "success", sH, 0.194, SUCCESS_SCALE);
+  addScale(tokens, "warning", wHL, 0.159, WARNING_SCALE);
+
+  return tokens;
 }
 
 export function createThemeFromBaseColor(hexColor: string): TokenOverrides {
-  const rgb = parseHexColor(hexColor) ?? { red: 124, green: 58, blue: 237 };
-  const hue = Math.round(rgbToHslHue(rgb));
-  const primaryForeground =
-    relativeLuminance(rgb) > 0.56 ? "oklch(9% 0 0)" : "oklch(100% 0 0)";
-  const neutralHue = normalizeHue(hue + 8);
-
-  return {
-    ...createScale("--bambi-primary", PRIMARY_SCALE, hue),
-    ...createScale("--bambi-neutral", NEUTRAL_SCALE, neutralHue),
-    ...createScale("--bambi-danger", INTENT_SCALE, 28),
-    ...createScale("--bambi-success", INTENT_SCALE, 153),
-    ...createScale("--bambi-warning", WARNING_SCALE, 74),
-    "--bambi-background": "var(--bambi-neutral-50)",
-    "--bambi-foreground": "var(--bambi-neutral-950)",
-    "--bambi-card": "var(--bambi-color-white)",
-    "--bambi-card-foreground": "var(--bambi-neutral-950)",
-    "--bambi-popover": "var(--bambi-color-white)",
-    "--bambi-popover-foreground": "var(--bambi-neutral-950)",
-    "--bambi-primary": "var(--bambi-primary-500)",
-    "--bambi-primary-foreground": primaryForeground,
-    "--bambi-secondary": "var(--bambi-neutral-100)",
-    "--bambi-secondary-foreground": "var(--bambi-neutral-950)",
-    "--bambi-accent": "var(--bambi-neutral-100)",
-    "--bambi-accent-foreground": "var(--bambi-neutral-950)",
-    "--bambi-muted": "var(--bambi-neutral-100)",
-    "--bambi-muted-foreground": "var(--bambi-neutral-500)",
-    "--bambi-danger": "var(--bambi-danger-500)",
-    "--bambi-danger-foreground": "var(--bambi-color-white)",
-    "--bambi-success": "var(--bambi-success-500)",
-    "--bambi-success-foreground": "var(--bambi-neutral-950)",
-    "--bambi-warning": "var(--bambi-warning-500)",
-    "--bambi-warning-foreground": "var(--bambi-neutral-950)",
-    "--bambi-border": "var(--bambi-neutral-200)",
-    "--bambi-input": "var(--bambi-neutral-200)",
-    "--bambi-input-background": "var(--bambi-color-white)",
-    "--bambi-input-foreground": "var(--bambi-neutral-950)",
-    "--bambi-input-placeholder": "var(--bambi-neutral-500)",
-    "--bambi-ring": "var(--bambi-primary)",
-    "--bambi-separator": "var(--bambi-neutral-200)",
-    "--bambi-intent-primary-bg": "var(--bambi-primary)",
-    "--bambi-intent-primary-fg": "var(--bambi-primary-foreground)",
-    "--bambi-intent-primary-hover-bg": "var(--bambi-primary-600)",
-    "--bambi-intent-secondary-bg": "var(--bambi-secondary)",
-    "--bambi-intent-secondary-fg": "var(--bambi-secondary-foreground)",
-    "--bambi-intent-secondary-hover-bg": "var(--bambi-accent)",
-    "--bambi-intent-danger-bg": "var(--bambi-danger)",
-    "--bambi-intent-danger-fg": "var(--bambi-danger-foreground)",
-    "--bambi-intent-danger-hover-bg": "var(--bambi-danger-600)",
-    "--bambi-intent-success-bg": "var(--bambi-success)",
-    "--bambi-intent-success-fg": "var(--bambi-success-foreground)",
-    "--bambi-intent-success-hover-bg": "var(--bambi-success-600)",
-    "--bambi-intent-warning-bg": "var(--bambi-warning)",
-    "--bambi-intent-warning-fg": "var(--bambi-warning-foreground)",
-    "--bambi-intent-warning-hover-bg": "var(--bambi-warning-600)",
-  };
+  const color = hexToOklch(hexColor) ?? { hue: 271, chroma: 0.22 };
+  return generateColorTokens(color.hue, color.chroma, 46);
 }
 
 export function createDarkThemeFromBaseColor(hexColor: string): TokenOverrides {
@@ -145,73 +251,5 @@ export function createDarkThemeFromBaseColor(hexColor: string): TokenOverrides {
 }
 
 export function isValidHexColor(value: string): boolean {
-  return parseHexColor(value) !== null;
-}
-
-function createScale(
-  prefix: string,
-  scale: readonly (readonly [string, number, number])[],
-  hue: number,
-): TokenOverrides {
-  return Object.fromEntries(
-    scale.map(([step, lightness, chroma]) => [
-      `${prefix}-${step}`,
-      `oklch(${lightness}% ${chroma} ${normalizeHue(hue)})`,
-    ]),
-  );
-}
-
-function normalizeHue(hue: number): number {
-  const normalized = hue % 360;
-  return normalized < 0 ? normalized + 360 : normalized;
-}
-
-function parseHexColor(value: string): RgbColor | null {
-  const normalized = value.trim().replace(/^#/, "");
-  const expanded =
-    normalized.length === 3
-      ? normalized
-          .split("")
-          .map((character) => `${character}${character}`)
-          .join("")
-      : normalized;
-
-  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) return null;
-
-  return {
-    red: Number.parseInt(expanded.slice(0, 2), 16),
-    green: Number.parseInt(expanded.slice(2, 4), 16),
-    blue: Number.parseInt(expanded.slice(4, 6), 16),
-  };
-}
-
-function rgbToHslHue({ red, green, blue }: RgbColor): number {
-  const r = red / 255;
-  const g = green / 255;
-  const b = blue / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const delta = max - min;
-
-  if (delta === 0) return 271;
-
-  let hue = 0;
-  if (max === r) hue = ((g - b) / delta) % 6;
-  else if (max === g) hue = (b - r) / delta + 2;
-  else hue = (r - g) / delta + 4;
-
-  const degrees = hue * 60;
-  return degrees < 0 ? degrees + 360 : degrees;
-}
-
-function relativeLuminance({ red, green, blue }: RgbColor): number {
-  const channels = [red, green, blue].map((channel) => {
-    const normalized = channel / 255;
-    return normalized <= 0.03928
-      ? normalized / 12.92
-      : ((normalized + 0.055) / 1.055) ** 2.4;
-  });
-
-  const [r, g, b] = channels;
-  return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
+  return hexToOklch(value) !== null;
 }
