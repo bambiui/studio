@@ -205,6 +205,11 @@ export function Canvas({
               if (nextItems[0]) onSelectComponent(nextItems[0].componentId);
             }}
             onResize={(itemId, width) => updateItem(itemId, { width })}
+            onDuplicate={(itemId) => {
+              setItems((current) => duplicateItem(current, itemId));
+              const duplicated = items.find((item) => item.id === itemId);
+              if (duplicated) onSelectComponent(duplicated.componentId);
+            }}
             onReorder={(itemId, direction) => {
               setItems((current) => reorderItems(current, itemId, direction));
             }}
@@ -226,6 +231,21 @@ export function Canvas({
       </div>
     </section>
   );
+}
+
+function duplicateItem(items: CanvasItem[], itemId: string): CanvasItem[] {
+  const item = items.find((candidate) => candidate.id === itemId);
+  if (!item) return items;
+
+  return [
+    ...items,
+    {
+      ...item,
+      id: `item-${Date.now()}`,
+      x: item.x + 24,
+      y: item.y + 24,
+    },
+  ];
 }
 
 function reorderItems(
@@ -255,6 +275,7 @@ interface CanvasBoardProps {
   onClear: () => void;
   onImportItems: (items: CanvasItem[]) => void;
   onResize: (itemId: string, width: number) => void;
+  onDuplicate: (itemId: string) => void;
   onReorder: (itemId: string, direction: "forward" | "backward") => void;
   onRemove: (itemId: string) => void;
   onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
@@ -271,6 +292,7 @@ function CanvasBoard({
   onClear,
   onImportItems,
   onResize,
+  onDuplicate,
   onReorder,
   onRemove,
   onPointerMove,
@@ -412,6 +434,13 @@ function CanvasBoard({
                   <div className="flex gap-1">
                     <button
                       type="button"
+                      onClick={() => onDuplicate(item.id)}
+                      className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                    >
+                      Copy
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => onReorder(item.id, "backward")}
                       className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
                     >
@@ -480,16 +509,28 @@ function CanvasBoard({
                 <span className="text-xs font-semibold text-white">
                   {component.name}
                 </span>
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onRemove(item.id);
-                  }}
-                  className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
-                >
-                  Remove
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDuplicate(item.id);
+                    }}
+                    className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onRemove(item.id);
+                    }}
+                    className="rounded-full px-2 py-1 text-xs text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
               <div
                 className="rounded-xl border border-slate-200 bg-[var(--bambi-background)] p-4 text-[var(--bambi-foreground)]"
