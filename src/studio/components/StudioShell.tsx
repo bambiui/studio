@@ -10,6 +10,7 @@ import {
 import { parseThemeImport } from "../theme/importers";
 import type { TokenOverrides } from "../tokens/defaults";
 import type { PreviewScheme, StudioStyle } from "../types";
+import { BuilderDrawerLeft } from "./BuilderDrawerLeft";
 import { Canvas } from "./Canvas";
 import { ComponentExplorer } from "./ComponentExplorer";
 import { ExportDialog } from "./ExportDialog";
@@ -157,38 +158,50 @@ export function StudioShell() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0b1020] text-slate-100 xl:flex-row">
-      <ComponentExplorer
-        selectedComponentId={selectedComponent?.id ?? ""}
+    <div className="min-h-screen bg-[#0b1020] text-slate-100">
+      <BuilderDrawerLeft
+        previewScheme={previewScheme}
+        onChangePreviewScheme={setPreviewScheme}
         onSelectComponent={setSelectedComponentId}
       />
-      <main className="flex min-w-0 flex-1 flex-col">
-        <TopBar
-          tokenCount={Object.keys(tokenOverrides).length}
-          previewScheme={previewScheme}
-          importMessage={importMessage}
-          canUndo={historyPast.length > 0}
-          canRedo={historyFuture.length > 0}
-          onChangePreviewScheme={setPreviewScheme}
-          onImportTheme={importTheme}
-          onUndo={undoThemeChange}
-          onRedo={redoThemeChange}
-          onOpenExport={() => setIsExportOpen(true)}
+      <div id="canvas" className="min-h-screen lg:pl-[220px] xl:pr-[320px]">
+        <main id="canvas-transform" className="flex min-w-0 flex-1 flex-col">
+          <ComponentExplorer
+            selectedComponentId={selectedComponent?.id ?? ""}
+            onSelectComponent={setSelectedComponentId}
+          />
+          <TopBar
+            tokenCount={Object.keys(tokenOverrides).length}
+            previewScheme={previewScheme}
+            importMessage={importMessage}
+            canUndo={historyPast.length > 0}
+            canRedo={historyFuture.length > 0}
+            onChangePreviewScheme={setPreviewScheme}
+            onImportTheme={importTheme}
+            onUndo={undoThemeChange}
+            onRedo={redoThemeChange}
+            onOpenExport={() => setIsExportOpen(true)}
+          />
+          <Canvas
+            selectedComponentId={selectedComponent?.id ?? ""}
+            onSelectComponent={setSelectedComponentId}
+            previewStyle={previewStyle}
+          />
+        </main>
+      </div>
+      <div
+        id="drawer-right"
+        className="token-drawer-content xl:fixed xl:bottom-0 xl:right-0 xl:top-0 xl:z-30 xl:w-[320px] xl:overflow-auto"
+      >
+        <InspectorPanel
+          selectedComponent={selectedComponent}
+          tokenOverrides={tokenOverrides}
+          onUpdateToken={updateToken}
+          onResetTokens={resetTokens}
+          onApplyGeneratedTheme={applyGeneratedTheme}
+          onApplyGeneratedDarkTheme={applyGeneratedDarkTheme}
         />
-        <Canvas
-          selectedComponentId={selectedComponent?.id ?? ""}
-          onSelectComponent={setSelectedComponentId}
-          previewStyle={previewStyle}
-        />
-      </main>
-      <InspectorPanel
-        selectedComponent={selectedComponent}
-        tokenOverrides={tokenOverrides}
-        onUpdateToken={updateToken}
-        onResetTokens={resetTokens}
-        onApplyGeneratedTheme={applyGeneratedTheme}
-        onApplyGeneratedDarkTheme={applyGeneratedDarkTheme}
-      />
+      </div>
       <ExportDialog
         isOpen={isExportOpen}
         tokens={tokenOverrides}
