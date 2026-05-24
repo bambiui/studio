@@ -120,6 +120,30 @@ export function createThemeFromBaseColor(hexColor: string): TokenOverrides {
   };
 }
 
+export function createDarkThemeFromBaseColor(hexColor: string): TokenOverrides {
+  return {
+    ...createThemeFromBaseColor(hexColor),
+    "--bambi-background": "var(--bambi-neutral-950)",
+    "--bambi-foreground": "var(--bambi-neutral-50)",
+    "--bambi-card": "var(--bambi-neutral-900)",
+    "--bambi-card-foreground": "var(--bambi-neutral-50)",
+    "--bambi-popover": "var(--bambi-neutral-900)",
+    "--bambi-popover-foreground": "var(--bambi-neutral-50)",
+    "--bambi-secondary": "var(--bambi-neutral-800)",
+    "--bambi-secondary-foreground": "var(--bambi-neutral-50)",
+    "--bambi-accent": "var(--bambi-neutral-800)",
+    "--bambi-accent-foreground": "var(--bambi-neutral-50)",
+    "--bambi-muted": "var(--bambi-neutral-800)",
+    "--bambi-muted-foreground": "var(--bambi-neutral-400)",
+    "--bambi-border": "var(--bambi-neutral-800)",
+    "--bambi-input": "var(--bambi-neutral-700)",
+    "--bambi-input-background": "var(--bambi-neutral-900)",
+    "--bambi-input-foreground": "var(--bambi-neutral-50)",
+    "--bambi-input-placeholder": "var(--bambi-neutral-400)",
+    "--bambi-separator": "var(--bambi-neutral-800)",
+  };
+}
+
 export function isValidHexColor(value: string): boolean {
   return parseHexColor(value) !== null;
 }

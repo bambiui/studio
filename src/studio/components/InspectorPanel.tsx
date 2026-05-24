@@ -17,6 +17,7 @@ interface InspectorPanelProps {
   onUpdateToken: (tokenId: string, value: string) => void;
   onResetTokens: () => void;
   onApplyGeneratedTheme: (baseColor: string) => void;
+  onApplyGeneratedDarkTheme: (baseColor: string) => void;
 }
 
 export function InspectorPanel({
@@ -25,6 +26,7 @@ export function InspectorPanel({
   onUpdateToken,
   onResetTokens,
   onApplyGeneratedTheme,
+  onApplyGeneratedDarkTheme,
 }: InspectorPanelProps) {
   const [baseColor, setBaseColor] = useState("#7c3aed");
   const [tokenQuery, setTokenQuery] = useState("");
@@ -114,14 +116,24 @@ export function InspectorPanel({
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          disabled={!canGenerateTheme}
-          onClick={() => onApplyGeneratedTheme(baseColor)}
-          className="mt-3 w-full rounded-xl bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Generate theme
-        </button>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            disabled={!canGenerateTheme}
+            onClick={() => onApplyGeneratedTheme(baseColor)}
+            className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Generate light
+          </button>
+          <button
+            type="button"
+            disabled={!canGenerateTheme}
+            onClick={() => onApplyGeneratedDarkTheme(baseColor)}
+            className="rounded-xl border border-violet-400/40 bg-black/30 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Generate dark
+          </button>
+        </div>
       </section>
 
       <section className="mb-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4">

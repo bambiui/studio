@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { PREVIEW_SCHEMES, STORAGE_KEY } from "../constants";
 import { studioComponents } from "../registry/components";
-import { createThemeFromBaseColor } from "../theme/generator";
+import {
+  createDarkThemeFromBaseColor,
+  createThemeFromBaseColor,
+} from "../theme/generator";
 import { parseThemeImport } from "../theme/importers";
 import type { TokenOverrides } from "../tokens/defaults";
 import type { PreviewScheme, StudioStyle } from "../types";
@@ -132,6 +135,14 @@ export function StudioShell() {
     }));
   };
 
+  const applyGeneratedDarkTheme = (baseColor: string) => {
+    commitTokenOverrides((current) => ({
+      ...current,
+      ...createDarkThemeFromBaseColor(baseColor),
+    }));
+    setPreviewScheme("dark");
+  };
+
   const importTheme = async (file: File) => {
     try {
       const source = await file.text();
@@ -176,6 +187,7 @@ export function StudioShell() {
         onUpdateToken={updateToken}
         onResetTokens={resetTokens}
         onApplyGeneratedTheme={applyGeneratedTheme}
+        onApplyGeneratedDarkTheme={applyGeneratedDarkTheme}
       />
       <ExportDialog
         isOpen={isExportOpen}
