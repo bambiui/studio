@@ -12,15 +12,12 @@ import type { TokenOverrides } from "../tokens/defaults";
 import type { PreviewScheme, StudioStyle } from "../types";
 import { BuilderDrawerLeft } from "./BuilderDrawerLeft";
 import { Canvas } from "./Canvas";
-import { ComponentExplorer } from "./ComponentExplorer";
 import { ExportDialog } from "./ExportDialog";
 import { InspectorPanel } from "./InspectorPanel";
 import { TopBar } from "./TopBar";
 
 export function StudioShell() {
-  const [selectedComponentId, setSelectedComponentId] = useState(
-    studioComponents[0]?.id ?? "",
-  );
+  const [selectedComponentId, setSelectedComponentId] = useState("hero");
   const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
   const [historyPast, setHistoryPast] = useState<TokenOverrides[]>([]);
   const [historyFuture, setHistoryFuture] = useState<TokenOverrides[]>([]);
@@ -49,7 +46,7 @@ export function StudioShell() {
     () =>
       studioComponents.find(
         (component) => component.id === selectedComponentId,
-      ) ?? studioComponents[0],
+      ),
     [selectedComponentId],
   );
 
@@ -160,17 +157,13 @@ export function StudioShell() {
   return (
     <div className="min-h-screen bg-[#0b1020] text-slate-100">
       <BuilderDrawerLeft
-        selectedComponentId={selectedComponent?.id ?? ""}
+        selectedComponentId={selectedComponentId}
         previewScheme={previewScheme}
         onChangePreviewScheme={setPreviewScheme}
         onSelectComponent={setSelectedComponentId}
       />
       <main className="min-h-screen lg:pl-[220px] xl:pr-[320px]">
         <div className="relative z-20 border-b border-white/10 bg-[#0b1020]/90 backdrop-blur">
-          <ComponentExplorer
-            selectedComponentId={selectedComponent?.id ?? ""}
-            onSelectComponent={setSelectedComponentId}
-          />
           <TopBar
             tokenCount={Object.keys(tokenOverrides).length}
             previewScheme={previewScheme}
@@ -185,7 +178,7 @@ export function StudioShell() {
           />
         </div>
         <Canvas
-          selectedComponentId={selectedComponent?.id ?? ""}
+          selectedComponentId={selectedComponentId}
           onSelectComponent={setSelectedComponentId}
           previewStyle={previewStyle}
         />
