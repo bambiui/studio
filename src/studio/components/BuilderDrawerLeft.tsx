@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/button";
 import { componentCategories, studioComponents } from "../registry/components";
 import type { PreviewScheme } from "../types";
 
@@ -43,16 +44,17 @@ export function BuilderDrawerLeft({
       className="fixed bottom-0 left-0 top-0 z-30 hidden w-[220px] flex-col border-r border-white/10 bg-[#080d1a] p-3 text-slate-100 lg:flex"
     >
       <div className="bambi-sidebar-header px-2 py-3">
-        <button
+        <Button
           type="button"
-          onClick={() => onSelectComponent("button")}
+          variant="ghost"
+          onClick={() => onSelectComponent("hero")}
           className="drawer-brand flex items-center gap-2"
         >
           <span className="brand-logo flex h-6 w-6 rounded-md bg-[var(--bambi-primary)]" />
           <span className="brand-name text-sm font-bold tracking-tight text-white">
             bambiui
           </span>
-        </button>
+        </Button>
       </div>
 
       <div className="bambi-sidebar-content min-h-0 flex-1 overflow-auto py-3">
@@ -67,18 +69,17 @@ export function BuilderDrawerLeft({
 
                 return (
                   <li key={`${group.label}-${item.label}`}>
-                    <button
+                    <Button
                       type="button"
+                      variant={isActive ? "primary" : "ghost"}
                       data-card={item.componentId}
                       onClick={() => onSelectComponent(item.componentId)}
-                      className={`nav-item w-full rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/10 hover:text-white ${
-                        isActive
-                          ? "bg-violet-500/15 text-violet-100"
-                          : "text-slate-300"
+                      className={`nav-item w-full rounded-xl px-3 py-2 text-left text-sm ${
+                        isActive ? "text-violet-100" : "text-slate-300"
                       }`}
                     >
                       {item.label}
-                    </button>
+                    </Button>
                   </li>
                 );
               })}
@@ -93,19 +94,19 @@ export function BuilderDrawerLeft({
         </span>
         <div className="theme-switcher grid grid-cols-2 gap-1 rounded-xl bg-white/5 p-1">
           {(["light", "dark"] as const).map((scheme) => (
-            <button
+            <Button
               key={scheme}
               type="button"
+              variant={previewScheme === scheme ? "secondary" : "ghost"}
+              size="sm"
               data-theme-val={scheme}
               onClick={() => onChangePreviewScheme(scheme)}
-              className={`theme-btn rounded-lg px-3 py-2 text-xs font-medium capitalize transition ${
-                previewScheme === scheme
-                  ? "bg-white text-[#080d1a]"
-                  : "text-slate-400 hover:text-white"
+              className={`theme-btn rounded-lg px-3 py-2 text-xs font-medium capitalize ${
+                previewScheme === scheme ? "text-[#080d1a]" : "text-slate-400"
               }`}
             >
               {scheme}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

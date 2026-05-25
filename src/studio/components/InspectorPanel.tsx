@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
 import type { StudioComponentDefinition } from "../registry/components";
 import { getContrastReport } from "../theme/contrast";
 import { isValidHexColor } from "../theme/generator";
@@ -10,10 +12,12 @@ import {
   type TokenGroup,
 } from "../tokens/metadata";
 import { TokenValueControl } from "./TokenValueControl";
+import type { PreviewScheme } from "../types";
 
 interface InspectorPanelProps {
   selectedComponent?: StudioComponentDefinition;
   tokenOverrides: TokenOverrides;
+  previewScheme: PreviewScheme;
   onUpdateToken: (tokenId: string, value: string) => void;
   onResetTokens: () => void;
   onApplyGeneratedTheme: (baseColor: string) => void;
@@ -23,6 +27,7 @@ interface InspectorPanelProps {
 export function InspectorPanel({
   selectedComponent,
   tokenOverrides,
+  previewScheme,
   onUpdateToken,
   onResetTokens,
   onApplyGeneratedTheme,
@@ -85,55 +90,56 @@ export function InspectorPanel({
           tokenları üret.
         </p>
         <div className="mt-4 flex gap-2">
-          <input
+          <Input
             type="color"
             value={canGenerateTheme ? baseColor : "#7c3aed"}
             onChange={(event) => setBaseColor(event.target.value)}
             className="h-10 w-12 rounded-xl border border-white/10 bg-transparent p-1"
             aria-label="Base color"
           />
-          <input
+          <Input
             value={baseColor}
             onChange={(event) => setBaseColor(event.target.value)}
-            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100"
             placeholder="#7c3aed"
           />
         </div>
         <div className="mt-3 grid grid-cols-5 gap-2">
           {themePresets.map((preset) => (
-            <button
+            <Button
               key={preset.id}
               type="button"
+              variant="outline"
               title={preset.name}
               onClick={() => {
                 setBaseColor(preset.color);
-                onApplyGeneratedTheme(preset.color);
+                if (previewScheme === "dark") {
+                  onApplyGeneratedDarkTheme(preset.color);
+                } else {
+                  onApplyGeneratedTheme(preset.color);
+                }
               }}
-              className="flex h-9 items-center justify-center rounded-xl border border-white/10 text-[10px] font-medium text-white transition hover:border-white/30"
+              className="flex h-9 items-center justify-center rounded-xl border border-white/10 text-[10px] font-medium text-white"
               style={{ background: preset.color }}
             >
               {preset.name.slice(0, 1)}
-            </button>
+            </Button>
           ))}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            disabled={!canGenerateTheme}
-            onClick={() => onApplyGeneratedTheme(baseColor)}
-            className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Generate light
-          </button>
-          <button
-            type="button"
-            disabled={!canGenerateTheme}
-            onClick={() => onApplyGeneratedDarkTheme(baseColor)}
-            className="rounded-xl border border-violet-400/40 bg-black/30 px-4 py-2 text-sm font-medium text-violet-100 transition hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Generate dark
-          </button>
-        </div>
+        <Button
+          type="button"
+          disabled={!canGenerateTheme}
+          onClick={() => {
+            if (previewScheme === "dark") {
+              onApplyGeneratedDarkTheme(baseColor);
+            } else {
+              onApplyGeneratedTheme(baseColor);
+            }
+          }}
+          className="mt-3 w-full rounded-xl px-4 py-2 text-sm font-medium"
+        >
+          Generate {previewScheme} theme
+        </Button>
       </section>
 
       <section className="mb-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4">
@@ -176,13 +182,15 @@ export function InspectorPanel({
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-white">Token editor</h3>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={onResetTokens}
-            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10"
+            className="rounded-full px-3 py-1 text-xs"
           >
             Reset
-          </button>
+          </Button>
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
           Token değerlerini düzenle; değişiklikler canvas preview alanına anında
@@ -192,27 +200,25 @@ export function InspectorPanel({
           <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Token search
           </span>
-          <input
+          <Input
             value={tokenQuery}
             onChange={(event) => setTokenQuery(event.target.value)}
             placeholder="Search all tokens..."
-            className="w-full rounded-2xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+            className="w-full rounded-2xl border border-white/10 bg-[#050814] px-3 py-2 text-sm text-slate-100"
           />
         </label>
         <div className="mt-3 flex flex-wrap gap-2">
           {tokenGroups.map((group) => (
-            <button
+            <Button
               key={group}
               type="button"
+              variant={activeTokenGroup === group ? "primary" : "outline"}
+              size="sm"
               onClick={() => setActiveTokenGroup(group)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                activeTokenGroup === group
-                  ? "border-violet-400 bg-violet-500/20 text-white"
-                  : "border-white/10 text-slate-400 hover:bg-white/10"
-              }`}
+              className="rounded-full px-3 py-1 text-xs"
             >
               {group}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="mt-4 space-y-3">
@@ -236,13 +242,15 @@ export function InspectorPanel({
                   </span>
                   <div className="flex items-center gap-2">
                     {isOverridden ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => onUpdateToken(tokenId, "")}
-                        className="rounded-full border border-violet-400/30 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-violet-200 transition hover:bg-violet-500/20"
+                        className="rounded-full px-2 py-1 text-[10px] uppercase tracking-wide"
                       >
                         Reset
-                      </button>
+                      </Button>
                     ) : null}
                     <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] uppercase tracking-wide text-slate-400">
                       {token?.group ?? "Token"}

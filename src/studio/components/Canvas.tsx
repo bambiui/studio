@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/src/components/ui/button";
 import {
   studioComponents,
   type StudioComponentDefinition,
@@ -266,20 +267,23 @@ export function Canvas({
           <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
             {zoomLabel}%
           </span>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => flyToCard(selectedComponentId)}
-            className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+            className="rounded-full px-3 py-1 text-xs"
           >
             Focus {selectedComponent?.name ?? "selected"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="sm"
             onClick={() => resetCanvasView()}
-            className="rounded-full bg-violet-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-violet-400"
+            className="rounded-full px-3 py-1 text-xs"
           >
             Reset view
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -512,17 +516,15 @@ function CanvasCard({
           </h3>
           <p className="component-description">{component.description}</p>
         </div>
-        <button
+        <Button
           type="button"
+          variant={isSelected ? "primary" : "outline"}
+          size="sm"
           onClick={onSelect}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-            isSelected
-              ? "bg-violet-500 text-white"
-              : "border border-white/10 text-slate-300 hover:bg-white/10"
-          }`}
+          className="rounded-full px-3 py-1 text-xs"
         >
           {isSelected ? "Selected" : "Inspect"}
-        </button>
+        </Button>
       </header>
       <div
         className="bambi-preview component-preview-card rounded-[1.25rem] border border-[var(--bambi-border)] bg-[var(--bambi-background)] p-6 text-[var(--bambi-foreground)]"

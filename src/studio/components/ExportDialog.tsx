@@ -1,4 +1,11 @@
 import { useMemo, useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import {
+  Checkbox,
+  CheckboxIndicator,
+  CheckboxLabel,
+} from "@/src/components/ui/checkbox";
+import { Textarea } from "@/src/components/ui/textarea";
 import {
   serializeThemeAsCss,
   serializeThemeAsJson,
@@ -77,43 +84,44 @@ export function ExportDialog({
               olarak al.
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={onClose}
-            className="rounded-full border border-white/10 px-3 py-1 text-sm text-slate-300 transition hover:bg-white/10"
+            className="rounded-full px-3 py-1 text-sm"
           >
             Close
-          </button>
+          </Button>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 p-5">
           <div className="flex flex-wrap gap-2">
             {(["css", "json", "preset"] as const).map((option) => (
-              <button
+              <Button
                 key={option}
                 type="button"
+                variant={format === option ? "primary" : "outline"}
                 onClick={() => setFormat(option)}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                  format === option
-                    ? "border-violet-400 bg-violet-500/20 text-white"
-                    : "border-white/10 text-slate-300 hover:bg-white/10"
-                }`}
+                className="rounded-full px-4 py-2 text-sm font-medium"
               >
                 {option.toUpperCase()}
-              </button>
+              </Button>
             ))}
           </div>
-          <label className="flex items-center gap-2 text-xs text-slate-400">
-            <input
-              type="checkbox"
-              checked={includePreviewTokens}
-              onChange={(event) =>
-                setIncludePreviewTokens(event.target.checked)
-              }
-              className="accent-violet-500"
-            />
-            Include {previewScheme} preview tokens
-          </label>
+          <Checkbox
+            checked={includePreviewTokens}
+            onCheckedChange={(detail) =>
+              setIncludePreviewTokens(detail.checked === true)
+            }
+            ariaLabel="Include preview tokens"
+            className="flex items-center gap-2 text-xs text-slate-400"
+          >
+            <CheckboxIndicator>✓</CheckboxIndicator>
+            <CheckboxLabel>
+              Include {previewScheme} preview tokens
+            </CheckboxLabel>
+          </Checkbox>
         </div>
 
         <div className="px-5 pb-4">
@@ -145,28 +153,30 @@ export function ExportDialog({
         </div>
 
         <div className="min-h-0 flex-1 px-5 pb-5">
-          <textarea
+          <Textarea
             readOnly
             value={serializedTheme}
-            className="h-80 w-full resize-none rounded-2xl border border-white/10 bg-[#050814] p-4 font-mono text-xs leading-5 text-slate-100 outline-none"
+            resize="none"
+            className="h-80 w-full rounded-2xl border border-white/10 bg-[#050814] p-4 font-mono text-xs leading-5 text-slate-100"
           />
         </div>
 
         <div className="flex justify-end gap-3 border-t border-white/10 p-5">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={copyToClipboard}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10"
+            className="rounded-full px-4 py-2 text-sm font-medium"
           >
             {copyState}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={downloadTheme}
-            className="rounded-full bg-violet-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-400"
+            className="rounded-full px-4 py-2 text-sm font-medium"
           >
             Download
-          </button>
+          </Button>
         </div>
       </section>
     </div>

@@ -1,3 +1,11 @@
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import {
+  Slider,
+  SliderRange,
+  SliderThumb,
+  SliderTrack,
+} from "@/src/components/ui/slider";
 import type { TokenDefinition } from "../tokens/metadata";
 
 interface TokenValueControlProps {
@@ -44,15 +52,21 @@ export function TokenValueControl({
           <span>Opacity</span>
           <span>{safeValue.toFixed(2)}</span>
         </span>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.05"
-          value={safeValue}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full accent-violet-400"
-        />
+        <Slider
+          value={[safeValue]}
+          min={0}
+          max={1}
+          step={0.05}
+          onValueChange={(detail) =>
+            onChange(String(detail.value[0] ?? safeValue))
+          }
+          aria-label="Opacity"
+        >
+          <SliderTrack>
+            <SliderRange />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
       </label>
     );
   }
@@ -63,11 +77,11 @@ export function TokenValueControl({
         <span className="mb-1 block text-xs font-medium text-slate-400">
           Value
         </span>
-        <input
+        <Input
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-xs text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-violet-400"
+          className="w-full rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-xs text-slate-100"
         />
       </label>
 
@@ -77,15 +91,16 @@ export function TokenValueControl({
           aria-label={`${tokenId} color presets`}
         >
           {COLOR_PRESETS.map((preset) => (
-            <button
+            <Button
               key={preset}
               type="button"
+              variant="outline"
               title={preset}
               onClick={() => onChange(preset)}
-              className={`h-6 w-6 rounded-full border transition ${
+              className={`h-6 w-6 rounded-full border p-0 ${
                 visibleValue === preset
                   ? "border-white ring-2 ring-violet-400"
-                  : "border-white/20 hover:border-white/50"
+                  : "border-white/20"
               }`}
               style={{ background: preset }}
             />
@@ -96,18 +111,16 @@ export function TokenValueControl({
       {token?.kind === "radius" ? (
         <div className="mt-2 flex flex-wrap gap-2">
           {RADIUS_PRESETS.map((preset) => (
-            <button
+            <Button
               key={preset}
               type="button"
+              variant={visibleValue === preset ? "primary" : "outline"}
+              size="sm"
               onClick={() => onChange(preset)}
-              className={`rounded-full border px-2 py-1 text-[10px] transition ${
-                visibleValue === preset
-                  ? "border-violet-400 bg-violet-500/20 text-white"
-                  : "border-white/10 text-slate-400 hover:bg-white/10"
-              }`}
+              className="rounded-full px-2 py-1 text-[10px]"
             >
               {preset}
-            </button>
+            </Button>
           ))}
         </div>
       ) : null}

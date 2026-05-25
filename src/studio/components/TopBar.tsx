@@ -1,12 +1,11 @@
-import type { PreviewScheme } from "../types";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
 
 interface TopBarProps {
   tokenCount: number;
-  previewScheme: PreviewScheme;
   importMessage: string | null;
   canUndo: boolean;
   canRedo: boolean;
-  onChangePreviewScheme: (scheme: PreviewScheme) => void;
   onImportTheme: (file: File) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -15,11 +14,9 @@ interface TopBarProps {
 
 export function TopBar({
   tokenCount,
-  previewScheme,
   importMessage,
   canUndo,
   canRedo,
-  onChangePreviewScheme,
   onImportTheme,
   onUndo,
   onRedo,
@@ -41,46 +38,36 @@ export function TopBar({
         </div>
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-300">
-        <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 sm:flex">
-          {(["light", "dark"] as const).map((scheme) => (
-            <button
-              key={scheme}
-              type="button"
-              onClick={() => onChangePreviewScheme(scheme)}
-              className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition ${
-                previewScheme === scheme
-                  ? "bg-violet-500 text-white"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              {scheme}
-            </button>
-          ))}
-        </div>
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
           {tokenCount} override
         </span>
         <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 md:flex">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             disabled={!canUndo}
             onClick={onUndo}
-            className="rounded-full px-3 py-1 text-xs font-medium text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-full px-3 py-1 text-xs"
           >
             Undo
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             disabled={!canRedo}
             onClick={onRedo}
-            className="rounded-full px-3 py-1 text-xs font-medium text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-full px-3 py-1 text-xs"
           >
             Redo
-          </button>
+          </Button>
         </div>
-        <label className="cursor-pointer rounded-full border border-white/10 px-4 py-2 font-medium text-slate-200 transition hover:bg-white/10">
+        <Button
+          as="label"
+          variant="outline"
+          className="cursor-pointer rounded-full px-4 py-2 font-medium"
+        >
           Import
-          <input
+          <Input
             type="file"
             accept="application/json,.json,text/css,.css"
             className="sr-only"
@@ -90,14 +77,14 @@ export function TopBar({
               event.currentTarget.value = "";
             }}
           />
-        </label>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onOpenExport}
-          className="rounded-full bg-violet-500 px-4 py-2 font-medium text-white shadow-lg shadow-violet-950/40 transition hover:bg-violet-400"
+          className="rounded-full px-4 py-2 font-medium shadow-lg shadow-violet-950/40"
         >
           Export
-        </button>
+        </Button>
       </div>
     </header>
   );

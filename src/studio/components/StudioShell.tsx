@@ -166,11 +166,9 @@ export function StudioShell() {
         <div className="relative z-20 border-b border-white/10 bg-[#0b1020]/90 backdrop-blur">
           <TopBar
             tokenCount={Object.keys(tokenOverrides).length}
-            previewScheme={previewScheme}
             importMessage={importMessage}
             canUndo={historyPast.length > 0}
             canRedo={historyFuture.length > 0}
-            onChangePreviewScheme={setPreviewScheme}
             onImportTheme={importTheme}
             onUndo={undoThemeChange}
             onRedo={redoThemeChange}
@@ -192,6 +190,7 @@ export function StudioShell() {
           tokenOverrides={tokenOverrides}
           onUpdateToken={updateToken}
           onResetTokens={resetTokens}
+          previewScheme={previewScheme}
           onApplyGeneratedTheme={applyGeneratedTheme}
           onApplyGeneratedDarkTheme={applyGeneratedDarkTheme}
         />
