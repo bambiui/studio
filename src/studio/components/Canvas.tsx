@@ -284,7 +284,9 @@ export function Canvas({
       </div>
 
       <div id="canvas-transform" ref={transformRef}>
-        <StudioHeroCard />
+        <StudioHeroCard isSelected={selectedComponentId === "hero"} />
+        <ColorSystemCard isSelected={selectedComponentId === "colors"} />
+        <TypographyCard isSelected={selectedComponentId === "typography"} />
         {studioComponents.map((component) => (
           <CanvasCard
             key={component.id}
@@ -299,9 +301,16 @@ export function Canvas({
   );
 }
 
-function StudioHeroCard() {
+interface FoundationCardProps {
+  isSelected: boolean;
+}
+
+function StudioHeroCard({ isSelected }: FoundationCardProps) {
   return (
-    <article id="card-hero" className="card studio-hero-card">
+    <article
+      id="card-hero"
+      className={`card studio-hero-card ${isSelected ? "active" : ""}`}
+    >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-300">
           BambiUI Studio
@@ -331,6 +340,146 @@ function StudioHeroCard() {
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
           <strong className="text-2xl text-white">16px</strong>
           <p className="mt-1 text-xs text-slate-400">adaptive grid</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+const colorFamilies = [
+  "primary",
+  "neutral",
+  "danger",
+  "success",
+  "warning",
+] as const;
+const colorSteps = [
+  "50",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+] as const;
+
+function ColorSystemCard({ isSelected }: FoundationCardProps) {
+  return (
+    <article
+      id="card-colors"
+      className={`card studio-foundation-card ${isSelected ? "active" : ""}`}
+    >
+      <header className="cardHeader">
+        <div>
+          <h3 className="text-base font-semibold text-[var(--bambi-primary)]">
+            Color System
+          </h3>
+          <p className="component-description">
+            Primary, neutral and semantic scales generated from Bambi tokens.
+          </p>
+        </div>
+        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+          {colorFamilies.length} scales
+        </span>
+      </header>
+      <div className="grid w-[min(720px,calc(100vw-3rem))] gap-4 rounded-[1.25rem] border border-[var(--bambi-border)] bg-[var(--bambi-background)] p-5 text-[var(--bambi-foreground)]">
+        {colorFamilies.map((family) => (
+          <div key={family} className="grid gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <strong className="text-sm capitalize">{family}</strong>
+              <code className="text-xs text-[var(--bambi-muted-foreground)]">
+                --bambi-{family}-*
+              </code>
+            </div>
+            <div className="grid grid-cols-11 overflow-hidden rounded-xl border border-[var(--bambi-border)]">
+              {colorSteps.map((step) => (
+                <div
+                  key={`${family}-${step}`}
+                  className="min-h-12"
+                  title={`${family}-${step}`}
+                >
+                  <div
+                    className="h-9"
+                    style={{ background: `var(--bambi-${family}-${step})` }}
+                  />
+                  <div className="bg-[var(--bambi-card)] py-1 text-center text-[9px] text-[var(--bambi-muted-foreground)]">
+                    {step}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+const typeSamples = [
+  {
+    label: "Display",
+    className: "text-4xl font-bold tracking-tight",
+    text: "Build with BambiUI",
+  },
+  {
+    label: "Heading",
+    className: "text-2xl font-semibold",
+    text: "Theme-aware component previews",
+  },
+  {
+    label: "Body",
+    className: "text-base",
+    text: "Inspect semantic, intent and component tokens directly on the canvas.",
+  },
+  {
+    label: "Caption",
+    className: "text-xs uppercase tracking-[0.2em]",
+    text: "Primitive scale",
+  },
+] as const;
+
+function TypographyCard({ isSelected }: FoundationCardProps) {
+  return (
+    <article
+      id="card-typography"
+      className={`card studio-foundation-card ${isSelected ? "active" : ""}`}
+    >
+      <header className="cardHeader">
+        <div>
+          <h3 className="text-base font-semibold text-[var(--bambi-primary)]">
+            Typography
+          </h3>
+          <p className="component-description">
+            Font family, size, weight, radius and shadow primitives in one
+            preview.
+          </p>
+        </div>
+      </header>
+      <div className="grid w-[min(720px,calc(100vw-3rem))] gap-5 rounded-[1.25rem] border border-[var(--bambi-border)] bg-[var(--bambi-background)] p-6 text-[var(--bambi-foreground)]">
+        {typeSamples.map((sample) => (
+          <div key={sample.label} className="grid gap-1">
+            <span className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--bambi-muted-foreground)]">
+              {sample.label}
+            </span>
+            <p className={sample.className}>{sample.text}</p>
+          </div>
+        ))}
+        <div className="grid gap-3 border-t border-[var(--bambi-separator)] pt-5 sm:grid-cols-3">
+          {["sm", "md", "lg"].map((size) => (
+            <div
+              key={size}
+              className="rounded-[var(--bambi-radius-lg)] border border-[var(--bambi-border)] p-4 shadow-[var(--bambi-shadow-sm)]"
+            >
+              <strong className="text-sm uppercase">Radius {size}</strong>
+              <p className="mt-2 text-sm text-[var(--bambi-muted-foreground)]">
+                Shadow and radius tokens
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </article>

@@ -125,6 +125,7 @@ select {
         rgba(255, 255, 255, 0.045);
 }
 
+.card.active,
 .studio-component-card.active {
     border-color: rgb(167, 139, 250);
     background: rgba(139, 92, 246, 0.12);

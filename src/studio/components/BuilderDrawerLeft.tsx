@@ -11,8 +11,13 @@ interface BuilderDrawerLeftProps {
 const navigationGroups = [
   {
     label: "Studio",
+    items: [{ label: "Overview", componentId: "hero" }],
+  },
+  {
+    label: "Foundations",
     items: [
-      { label: "Overview", componentId: studioComponents[0]?.id ?? "button" },
+      { label: "Colors", componentId: "colors" },
+      { label: "Typography", componentId: "typography" },
     ],
   },
   ...componentCategories.map((category) => ({
