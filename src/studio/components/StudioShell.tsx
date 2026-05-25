@@ -56,6 +56,16 @@ export function StudioShell() {
     [previewScheme, tokenOverrides],
   );
 
+  const chromeStyle = useMemo(
+    () =>
+      ({ ...tokenOverrides, ...PREVIEW_SCHEMES[previewScheme] }) as StudioStyle,
+    [previewScheme, tokenOverrides],
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = previewScheme;
+  }, [previewScheme]);
+
   const commitTokenOverrides = (
     updater: TokenOverrides | ((current: TokenOverrides) => TokenOverrides),
   ) => {
@@ -155,7 +165,7 @@ export function StudioShell() {
   };
 
   return (
-    <div className="studio-root" style={previewStyle}>
+    <div className="studio-root" style={chromeStyle}>
       <BuilderDrawerLeft
         selectedComponentId={selectedComponentId}
         previewScheme={previewScheme}
