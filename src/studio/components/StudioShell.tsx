@@ -164,8 +164,8 @@ export function StudioShell() {
         onChangePreviewScheme={setPreviewScheme}
         onSelectComponent={setSelectedComponentId}
       />
-      <div id="canvas" className="min-h-screen lg:pl-[220px] xl:pr-[320px]">
-        <main id="canvas-transform" className="flex min-w-0 flex-1 flex-col">
+      <main className="min-h-screen lg:pl-[220px] xl:pr-[320px]">
+        <div className="relative z-20 border-b border-white/10 bg-[#0b1020]/90 backdrop-blur">
           <ComponentExplorer
             selectedComponentId={selectedComponent?.id ?? ""}
             onSelectComponent={setSelectedComponentId}
@@ -182,13 +182,13 @@ export function StudioShell() {
             onRedo={redoThemeChange}
             onOpenExport={() => setIsExportOpen(true)}
           />
-          <Canvas
-            selectedComponentId={selectedComponent?.id ?? ""}
-            onSelectComponent={setSelectedComponentId}
-            previewStyle={previewStyle}
-          />
-        </main>
-      </div>
+        </div>
+        <Canvas
+          selectedComponentId={selectedComponent?.id ?? ""}
+          onSelectComponent={setSelectedComponentId}
+          previewStyle={previewStyle}
+        />
+      </main>
       <div
         id="drawer-right"
         className="token-drawer-content xl:fixed xl:bottom-0 xl:right-0 xl:top-0 xl:z-30 xl:w-[320px] xl:overflow-auto"

@@ -41,3 +41,136 @@ textarea,
 select {
     font: inherit;
 }
+
+#canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    overflow: hidden;
+    cursor: grab;
+    background-color: #050814;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+#canvas.panning {
+    cursor: grabbing;
+}
+
+#canvas-transform {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--builder-card-columns, 3), max-content);
+    align-items: start;
+    gap: 1.5rem;
+    padding: 2.5rem;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.studio-canvas-toolbar {
+    position: absolute;
+    top: 8.75rem;
+    left: 15rem;
+    right: 21rem;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    background: rgba(11, 16, 32, 0.82);
+    padding: 0.875rem 1rem;
+    backdrop-filter: blur(16px);
+    pointer-events: auto;
+}
+
+.card {
+    display: flex;
+    width: max-content;
+    min-width: 0;
+    max-width: min(720px, calc(100vw - 3rem));
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.045);
+    padding: 1rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+}
+
+.cardHeader {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.studio-hero-card {
+    width: min(720px, calc(100vw - 3rem));
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(139, 92, 246, 0.28),
+            transparent 34rem
+        ),
+        rgba(255, 255, 255, 0.045);
+}
+
+.studio-component-card.active {
+    border-color: rgb(167, 139, 250);
+    background: rgba(139, 92, 246, 0.12);
+    box-shadow: 0 24px 70px rgba(76, 29, 149, 0.34);
+}
+
+.component-description {
+    margin: 0.25rem 0 0;
+    max-width: 40rem;
+    color: rgb(148, 163, 184);
+    font-family: var(--bambi-font-sans);
+    font-size: var(--bambi-text-sm);
+    line-height: 1.5;
+}
+
+.component-preview-card {
+    width: min(720px, calc(100vw - 3rem));
+}
+
+.preview-section {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid var(--bambi-separator);
+    padding-top: 0.75rem;
+}
+
+.preview-section-label {
+    color: var(--bambi-muted-foreground);
+    font-family: var(--bambi-font-sans);
+    font-size: var(--bambi-text-xs);
+    font-weight: var(--bambi-font-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 1280px) {
+    .studio-canvas-toolbar {
+        right: 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .studio-canvas-toolbar {
+        left: 1rem;
+        top: 10rem;
+    }
+}
