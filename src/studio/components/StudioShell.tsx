@@ -17,7 +17,9 @@ import { InspectorPanel } from "./InspectorPanel";
 import { TopBar } from "./TopBar";
 
 export function StudioShell() {
-  const [selectedComponentId, setSelectedComponentId] = useState("hero");
+  const [selectedComponentId, setSelectedComponentId] = useState(
+    studioComponents[0]?.id ?? "",
+  );
   const [tokenOverrides, setTokenOverrides] = useState<TokenOverrides>({});
   const [historyPast, setHistoryPast] = useState<TokenOverrides[]>([]);
   const [historyFuture, setHistoryFuture] = useState<TokenOverrides[]>([]);

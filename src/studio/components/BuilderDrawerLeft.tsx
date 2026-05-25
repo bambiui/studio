@@ -10,17 +10,6 @@ interface BuilderDrawerLeftProps {
 }
 
 const navigationGroups = [
-  {
-    label: "Studio",
-    items: [{ label: "Overview", componentId: "hero" }],
-  },
-  {
-    label: "Foundations",
-    items: [
-      { label: "Colors", componentId: "colors" },
-      { label: "Typography", componentId: "typography" },
-    ],
-  },
   ...componentCategories.map((category) => ({
     label: category,
     items: studioComponents
@@ -44,7 +33,7 @@ export function BuilderDrawerLeft({
         <Button
           type="button"
           variant="ghost"
-          onClick={() => onSelectComponent("hero")}
+          onClick={() => onSelectComponent(studioComponents[0]?.id ?? "")}
           className="studio-brand"
         >
           <span className="studio-brand-logo" />
@@ -65,7 +54,7 @@ export function BuilderDrawerLeft({
                     <Button
                       type="button"
                       variant={isActive ? "primary" : "ghost"}
-                      data-card={item.componentId}
+                      data-component={item.componentId}
                       onClick={() => onSelectComponent(item.componentId)}
                       className={`studio-nav-button ${
                         isActive
