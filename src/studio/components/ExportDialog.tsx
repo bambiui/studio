@@ -69,17 +69,13 @@ export function ExportDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm">
-      <section className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded-3xl border border-white/10 bg-[#080d1a] shadow-2xl shadow-black/40">
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
+    <div className="studio-export-overlay">
+      <section className="studio-export-panel">
+        <div className="studio-export-header">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.24em] text-violet-300">
-              Export
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-white">
-              Theme output
-            </h2>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="studio-kicker">Export</p>
+            <h2 className="studio-title">Theme output</h2>
+            <p className="studio-export-description">
               Override edilen tokenları CSS, JSON veya BambiUI preset taslağı
               olarak al.
             </p>
@@ -89,21 +85,21 @@ export function ExportDialog({
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="rounded-full px-3 py-1 text-sm"
+            className="studio-action-button"
           >
             Close
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 p-5">
-          <div className="flex flex-wrap gap-2">
+        <div className="studio-export-controls">
+          <div className="studio-format-list">
             {(["css", "json", "preset"] as const).map((option) => (
               <Button
                 key={option}
                 type="button"
                 variant={format === option ? "primary" : "outline"}
                 onClick={() => setFormat(option)}
-                className="rounded-full px-4 py-2 text-sm font-medium"
+                className="studio-format-button"
               >
                 {option.toUpperCase()}
               </Button>
@@ -115,7 +111,7 @@ export function ExportDialog({
               setIncludePreviewTokens(detail.checked === true)
             }
             ariaLabel="Include preview tokens"
-            className="flex items-center gap-2 text-xs text-slate-400"
+            className="studio-export-checkbox"
           >
             <CheckboxIndicator>✓</CheckboxIndicator>
             <CheckboxLabel>
@@ -124,27 +120,22 @@ export function ExportDialog({
           </Checkbox>
         </div>
 
-        <div className="px-5 pb-4">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-sm font-semibold text-white">
-                Export summary
-              </h3>
-              <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-slate-400">
+        <div className="studio-export-summary-wrap">
+          <div className="studio-export-summary">
+            <div className="studio-export-summary-head">
+              <h3 className="studio-export-title-small">Export summary</h3>
+              <span className="studio-token-count-pill">
                 {tokenEntries.length} tokens
               </span>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="studio-export-tags">
               {tokenEntries.slice(0, 8).map(([token]) => (
-                <span
-                  key={token}
-                  className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-violet-200"
-                >
+                <span key={token} className="studio-export-tag">
                   {token}
                 </span>
               ))}
               {tokenEntries.length > 8 ? (
-                <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-slate-500">
+                <span className="studio-export-tag-muted">
                   +{tokenEntries.length - 8} more
                 </span>
               ) : null}
@@ -152,28 +143,28 @@ export function ExportDialog({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 px-5 pb-5">
+        <div className="studio-export-body">
           <Textarea
             readOnly
             value={serializedTheme}
             resize="none"
-            className="h-80 w-full rounded-2xl border border-white/10 bg-[#050814] p-4 font-mono text-xs leading-5 text-slate-100"
+            className="studio-export-textarea"
           />
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-white/10 p-5">
+        <div className="studio-export-footer">
           <Button
             type="button"
             variant="outline"
             onClick={copyToClipboard}
-            className="rounded-full px-4 py-2 text-sm font-medium"
+            className="studio-export-footer-button"
           >
             {copyState}
           </Button>
           <Button
             type="button"
             onClick={downloadTheme}
-            className="rounded-full px-4 py-2 text-sm font-medium"
+            className="studio-export-footer-button"
           >
             Download
           </Button>

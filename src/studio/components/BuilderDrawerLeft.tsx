@@ -39,31 +39,24 @@ export function BuilderDrawerLeft({
   onSelectComponent,
 }: BuilderDrawerLeftProps) {
   return (
-    <aside
-      id="drawer-left"
-      className="fixed bottom-0 left-0 top-0 z-30 hidden w-[220px] flex-col border-r border-white/10 bg-[#080d1a] p-3 text-slate-100 lg:flex"
-    >
-      <div className="bambi-sidebar-header px-2 py-3">
+    <aside id="drawer-left" className="studio-drawer-left">
+      <div className="studio-drawer-header">
         <Button
           type="button"
           variant="ghost"
           onClick={() => onSelectComponent("hero")}
-          className="drawer-brand flex items-center gap-2"
+          className="studio-brand"
         >
-          <span className="brand-logo flex h-6 w-6 rounded-md bg-[var(--bambi-primary)]" />
-          <span className="brand-name text-sm font-bold tracking-tight text-white">
-            bambiui
-          </span>
+          <span className="studio-brand-logo" />
+          <span className="studio-brand-name">bambiui</span>
         </Button>
       </div>
 
-      <div className="bambi-sidebar-content min-h-0 flex-1 overflow-auto py-3">
+      <div className="studio-drawer-content">
         {navigationGroups.map((group) => (
-          <div key={group.label} className="bambi-sidebar-group mb-5">
-            <span className="bambi-sidebar-group-label mb-2 block px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              {group.label}
-            </span>
-            <ul className="bambi-sidebar-menu grid gap-1">
+          <div key={group.label} className="studio-nav-group">
+            <span className="studio-group-label">{group.label}</span>
+            <ul className="studio-nav-list">
               {group.items.map((item) => {
                 const isActive = item.componentId === selectedComponentId;
 
@@ -74,8 +67,10 @@ export function BuilderDrawerLeft({
                       variant={isActive ? "primary" : "ghost"}
                       data-card={item.componentId}
                       onClick={() => onSelectComponent(item.componentId)}
-                      className={`nav-item w-full rounded-xl px-3 py-2 text-left text-sm ${
-                        isActive ? "text-violet-100" : "text-slate-300"
+                      className={`studio-nav-button ${
+                        isActive
+                          ? "studio-nav-button-active"
+                          : "studio-nav-button-inactive"
                       }`}
                     >
                       {item.label}
@@ -88,11 +83,9 @@ export function BuilderDrawerLeft({
         ))}
       </div>
 
-      <div className="drawer-footer border-t border-white/10 pt-3">
-        <span className="drawer-footer-label mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Theme
-        </span>
-        <div className="theme-switcher grid grid-cols-2 gap-1 rounded-xl bg-white/5 p-1">
+      <div className="studio-drawer-footer">
+        <span className="studio-footer-label">Theme</span>
+        <div className="studio-theme-switcher">
           {(["light", "dark"] as const).map((scheme) => (
             <Button
               key={scheme}
@@ -101,8 +94,10 @@ export function BuilderDrawerLeft({
               size="sm"
               data-theme-val={scheme}
               onClick={() => onChangePreviewScheme(scheme)}
-              className={`theme-btn rounded-lg px-3 py-2 text-xs font-medium capitalize ${
-                previewScheme === scheme ? "text-[#080d1a]" : "text-slate-400"
+              className={`studio-theme-button ${
+                previewScheme === scheme
+                  ? "studio-theme-button-active"
+                  : "studio-theme-button-inactive"
               }`}
             >
               {scheme}

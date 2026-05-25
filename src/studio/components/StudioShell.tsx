@@ -155,15 +155,15 @@ export function StudioShell() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1020] text-slate-100">
+    <div className="studio-root" style={previewStyle}>
       <BuilderDrawerLeft
         selectedComponentId={selectedComponentId}
         previewScheme={previewScheme}
         onChangePreviewScheme={setPreviewScheme}
         onSelectComponent={setSelectedComponentId}
       />
-      <main className="min-h-screen lg:pl-[220px] xl:pr-[320px]">
-        <div className="relative z-20 border-b border-white/10 bg-[#0b1020]/90 backdrop-blur">
+      <main className="studio-main">
+        <div className="studio-chrome-bar">
           <TopBar
             tokenCount={Object.keys(tokenOverrides).length}
             importMessage={importMessage}

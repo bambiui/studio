@@ -23,31 +23,25 @@ export function TopBar({
   onOpenExport,
 }: TopBarProps) {
   return (
-    <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#11172a]/95 px-6 backdrop-blur">
+    <header className="studio-topbar">
       <div>
-        <p className="text-xs font-medium uppercase tracking-[0.24em] text-violet-300">
-          BambiUI Platform
-        </p>
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-white">Studio</h1>
+        <p className="studio-kicker">BambiUI Platform</p>
+        <div className="studio-title-row">
+          <h1 className="studio-title">Studio</h1>
           {importMessage ? (
-            <span className="hidden text-xs text-slate-500 md:inline">
-              {importMessage}
-            </span>
+            <span className="studio-muted-note">{importMessage}</span>
           ) : null}
         </div>
       </div>
-      <div className="flex items-center gap-3 text-sm text-slate-300">
-        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-          {tokenCount} override
-        </span>
-        <div className="hidden rounded-full border border-white/10 bg-black/20 p-1 md:flex">
+      <div className="studio-topbar-actions">
+        <span className="studio-pill">{tokenCount} override</span>
+        <div className="studio-button-group">
           <Button
             variant="ghost"
             size="sm"
             disabled={!canUndo}
             onClick={onUndo}
-            className="rounded-full px-3 py-1 text-xs"
+            className="studio-action-button"
           >
             Undo
           </Button>
@@ -56,21 +50,17 @@ export function TopBar({
             size="sm"
             disabled={!canRedo}
             onClick={onRedo}
-            className="rounded-full px-3 py-1 text-xs"
+            className="studio-action-button"
           >
             Redo
           </Button>
         </div>
-        <Button
-          as="label"
-          variant="outline"
-          className="cursor-pointer rounded-full px-4 py-2 font-medium"
-        >
+        <Button as="label" variant="outline" className="studio-primary-action">
           Import
           <Input
             type="file"
             accept="application/json,.json,text/css,.css"
-            className="sr-only"
+            className="studio-sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (file) onImportTheme(file);
@@ -81,7 +71,7 @@ export function TopBar({
         <Button
           type="button"
           onClick={onOpenExport}
-          className="rounded-full px-4 py-2 font-medium shadow-lg shadow-violet-950/40"
+          className="studio-primary-action"
         >
           Export
         </Button>

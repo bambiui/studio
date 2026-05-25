@@ -48,7 +48,7 @@ export function TokenValueControl({
 
     return (
       <label className="mt-3 block">
-        <span className="mb-1 flex items-center justify-between text-xs font-medium text-slate-400">
+        <span className="mb-1 flex items-center justify-between text-xs font-medium text-[var(--bambi-muted-foreground)]">
           <span>Opacity</span>
           <span>{safeValue.toFixed(2)}</span>
         </span>
@@ -74,14 +74,14 @@ export function TokenValueControl({
   return (
     <div className="mt-3">
       <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-400">
+        <span className="mb-1 block text-xs font-medium text-[var(--bambi-muted-foreground)]">
           Value
         </span>
         <Input
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-white/10 bg-[#050814] px-3 py-2 text-xs text-slate-100"
+          className="w-full rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-input-background)] px-3 py-2 text-xs text-[var(--bambi-input-foreground)]"
         />
       </label>
 
@@ -99,8 +99,8 @@ export function TokenValueControl({
               onClick={() => onChange(preset)}
               className={`h-6 w-6 rounded-full border p-0 ${
                 visibleValue === preset
-                  ? "border-white ring-2 ring-violet-400"
-                  : "border-white/20"
+                  ? "border-[var(--bambi-foreground)] ring-2 ring-[var(--bambi-primary)]"
+                  : "border-[var(--bambi-border)]"
               }`}
               style={{ background: preset }}
             />

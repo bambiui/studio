@@ -255,16 +255,16 @@ export function Canvas({
     >
       <div className="studio-canvas-toolbar" aria-label="Canvas controls">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--bambi-primary)]">
             Free canvas
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[var(--bambi-muted-foreground)]">
             Space + drag pan · wheel pan · Cmd/Ctrl + wheel zoom · Cmd/Ctrl + 0
             reset
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+          <span className="rounded-full border border-[var(--bambi-border)] bg-[var(--bambi-muted)] px-3 py-1 text-xs text-[var(--bambi-muted-foreground)]">
             {zoomLabel}%
           </span>
           <Button
@@ -316,13 +316,13 @@ function StudioHeroCard({ isSelected }: FoundationCardProps) {
       className={`card studio-hero-card ${isSelected ? "active" : ""}`}
     >
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-300">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--bambi-primary)]">
           BambiUI Studio
         </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--bambi-foreground)]">
           Pan, zoom and inspect every component on a single board.
         </h1>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300">
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--bambi-muted-foreground)]">
           This canvas now follows the archived Studio structure: a fixed
           <span className="font-mono"> #canvas </span>viewport with a
           transformed
@@ -331,19 +331,29 @@ function StudioHeroCard({ isSelected }: FoundationCardProps) {
         </p>
       </div>
       <div className="grid w-full gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <strong className="text-2xl text-white">
+        <div className="rounded-2xl border border-[var(--bambi-border)] bg-[var(--bambi-muted)] p-4">
+          <strong className="text-2xl text-[var(--bambi-foreground)]">
             {studioComponents.length}
           </strong>
-          <p className="mt-1 text-xs text-slate-400">components on board</p>
+          <p className="mt-1 text-xs text-[var(--bambi-muted-foreground)]">
+            components on board
+          </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <strong className="text-2xl text-white">4×</strong>
-          <p className="mt-1 text-xs text-slate-400">maximum zoom</p>
+        <div className="rounded-2xl border border-[var(--bambi-border)] bg-[var(--bambi-muted)] p-4">
+          <strong className="text-2xl text-[var(--bambi-foreground)]">
+            4×
+          </strong>
+          <p className="mt-1 text-xs text-[var(--bambi-muted-foreground)]">
+            maximum zoom
+          </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <strong className="text-2xl text-white">16px</strong>
-          <p className="mt-1 text-xs text-slate-400">adaptive grid</p>
+        <div className="rounded-2xl border border-[var(--bambi-border)] bg-[var(--bambi-muted)] p-4">
+          <strong className="text-2xl text-[var(--bambi-foreground)]">
+            16px
+          </strong>
+          <p className="mt-1 text-xs text-[var(--bambi-muted-foreground)]">
+            adaptive grid
+          </p>
         </div>
       </div>
     </article>
@@ -386,7 +396,7 @@ function ColorSystemCard({ isSelected }: FoundationCardProps) {
             Primary, neutral and semantic scales generated from Bambi tokens.
           </p>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">
+        <span className="rounded-full border border-[var(--bambi-border)] bg-[var(--bambi-muted)] px-3 py-1 text-xs text-[var(--bambi-muted-foreground)]">
           {colorFamilies.length} scales
         </span>
       </header>
