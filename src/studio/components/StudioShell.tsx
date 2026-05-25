@@ -52,7 +52,7 @@ export function StudioShell() {
 
   const previewStyle = useMemo(
     () =>
-      ({ ...PREVIEW_SCHEMES[previewScheme], ...tokenOverrides }) as StudioStyle,
+      ({ ...tokenOverrides, ...PREVIEW_SCHEMES[previewScheme] }) as StudioStyle,
     [previewScheme, tokenOverrides],
   );
 
