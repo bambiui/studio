@@ -1,6 +1,8 @@
+import { componentCategories, studioComponents } from "../registry/components";
 import type { PreviewScheme } from "../types";
 
 interface BuilderDrawerLeftProps {
+  selectedComponentId: string;
   previewScheme: PreviewScheme;
   onChangePreviewScheme: (scheme: PreviewScheme) => void;
   onSelectComponent: (componentId: string) => void;
@@ -9,38 +11,23 @@ interface BuilderDrawerLeftProps {
 const navigationGroups = [
   {
     label: "Studio",
-    items: [{ label: "Overview", componentId: "button" }],
-  },
-  {
-    label: "Foundations",
     items: [
-      { label: "Colors", componentId: "badge" },
-      { label: "Typography", componentId: "code" },
+      { label: "Overview", componentId: studioComponents[0]?.id ?? "button" },
     ],
   },
-  {
-    label: "Actions",
-    items: [{ label: "Button & Group", componentId: "button" }],
-  },
-  {
-    label: "Inputs",
-    items: [
-      { label: "Input", componentId: "input" },
-      { label: "Textarea", componentId: "textarea" },
-      { label: "Switch", componentId: "switch" },
-      { label: "Slider", componentId: "slider" },
-    ],
-  },
-  {
-    label: "Layout",
-    items: [
-      { label: "Card", componentId: "card" },
-      { label: "Separator", componentId: "separator" },
-    ],
-  },
-] as const;
+  ...componentCategories.map((category) => ({
+    label: category,
+    items: studioComponents
+      .filter((component) => component.category === category)
+      .map((component) => ({
+        label: component.name,
+        componentId: component.id,
+      })),
+  })),
+];
 
 export function BuilderDrawerLeft({
+  selectedComponentId,
   previewScheme,
   onChangePreviewScheme,
   onSelectComponent,
@@ -70,18 +57,26 @@ export function BuilderDrawerLeft({
               {group.label}
             </span>
             <ul className="bambi-sidebar-menu grid gap-1">
-              {group.items.map((item) => (
-                <li key={`${group.label}-${item.label}`}>
-                  <button
-                    type="button"
-                    data-card={item.componentId}
-                    onClick={() => onSelectComponent(item.componentId)}
-                    className="nav-item w-full rounded-xl px-3 py-2 text-left text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
+              {group.items.map((item) => {
+                const isActive = item.componentId === selectedComponentId;
+
+                return (
+                  <li key={`${group.label}-${item.label}`}>
+                    <button
+                      type="button"
+                      data-card={item.componentId}
+                      onClick={() => onSelectComponent(item.componentId)}
+                      className={`nav-item w-full rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/10 hover:text-white ${
+                        isActive
+                          ? "bg-violet-500/15 text-violet-100"
+                          : "text-slate-300"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}

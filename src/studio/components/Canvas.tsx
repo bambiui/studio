@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   studioComponents,
   type StudioComponentDefinition,
@@ -39,43 +39,37 @@ export function Canvas({
     [selectedComponentId],
   );
 
-  useEffect(() => {
+  const applyTransform = useCallback((animated = false) => {
     const canvas = canvasRef.current;
     const transform = transformRef.current;
     if (!canvas || !transform) return;
 
-    const syncBoardLayout = () => {
-      const cardCount = transform.querySelectorAll(".card").length;
-      const columns = cardCount <= 1 ? 1 : cardCount <= 4 ? 2 : 3;
-      transform.style.setProperty("--builder-card-columns", String(columns));
-    };
-
-    const applyTransform = (animated = false) => {
-      if (animated) {
-        transform.style.transition =
-          "transform 0.48s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-        window.setTimeout(() => {
-          transform.style.transition = "";
-        }, 520);
-      } else {
+    if (animated) {
+      transform.style.transition =
+        "transform 0.48s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+      window.setTimeout(() => {
         transform.style.transition = "";
-      }
+      }, 520);
+    } else {
+      transform.style.transition = "";
+    }
 
-      const { x, y } = offsetRef.current;
-      const scale = scaleRef.current;
-      transform.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    const { x, y } = offsetRef.current;
+    const scale = scaleRef.current;
+    transform.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
 
-      let step = GRID_SIZE;
-      while (step * scale < 12) step *= 2;
-      const backgroundSize = step * scale;
-      canvas.style.backgroundSize = `${backgroundSize}px ${backgroundSize}px`;
-      canvas.style.backgroundPosition = `${x % backgroundSize}px ${
-        y % backgroundSize
-      }px`;
-      setZoomLabel(Math.round(scale * 100));
-    };
+    let step = GRID_SIZE;
+    while (step * scale < 12) step *= 2;
+    const backgroundSize = step * scale;
+    canvas.style.backgroundSize = `${backgroundSize}px ${backgroundSize}px`;
+    canvas.style.backgroundPosition = `${x % backgroundSize}px ${
+      y % backgroundSize
+    }px`;
+    setZoomLabel(Math.round(scale * 100));
+  }, []);
 
-    const zoomAt = (mouseX: number, mouseY: number, factor: number) => {
+  const zoomAt = useCallback(
+    (mouseX: number, mouseY: number, factor: number) => {
       const currentScale = scaleRef.current;
       const nextScale = Math.min(
         MAX_SCALE,
@@ -89,15 +83,21 @@ export function Canvas({
       };
       scaleRef.current = nextScale;
       applyTransform();
-    };
+    },
+    [applyTransform],
+  );
 
-    const resetView = () => {
+  const resetCanvasView = useCallback(
+    (animated = true) => {
       offsetRef.current = { x: DRAWER_LEFT_WIDTH + 40, y: 156 };
       scaleRef.current = 1;
-      applyTransform(true);
-    };
+      applyTransform(animated);
+    },
+    [applyTransform],
+  );
 
-    const flyToCard = (cardId: string, animated = true) => {
+  const flyToCard = useCallback(
+    (cardId: string, animated = true) => {
       const card = document.getElementById(`card-${cardId}`);
       if (!card) return;
 
@@ -114,6 +114,19 @@ export function Canvas({
         y: 156 - top,
       };
       applyTransform(animated);
+    },
+    [applyTransform],
+  );
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const transform = transformRef.current;
+    if (!canvas || !transform) return;
+
+    const syncBoardLayout = () => {
+      const cardCount = transform.querySelectorAll(".card").length;
+      const columns = cardCount <= 1 ? 1 : cardCount <= 4 ? 2 : 3;
+      transform.style.setProperty("--builder-card-columns", String(columns));
     };
 
     const handleMouseDown = (event: MouseEvent) => {
@@ -175,7 +188,7 @@ export function Canvas({
       }
 
       if ((event.metaKey || event.ctrlKey) && event.key === "0") {
-        resetView();
+        resetCanvasView();
         event.preventDefault();
       }
     };
@@ -225,55 +238,12 @@ export function Canvas({
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("wheel", handleWheel);
     };
-  }, [selectedComponentId]);
+  }, [applyTransform, flyToCard, resetCanvasView, selectedComponentId, zoomAt]);
 
-  const flyToSelected = () => {
-    const canvas = canvasRef.current;
-    const transform = transformRef.current;
-    const card = document.getElementById(`card-${selectedComponentId}`);
-    if (!canvas || !transform || !card) return;
-
-    transform.style.transition =
-      "transform 0.48s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-    window.setTimeout(() => {
-      transform.style.transition = "";
-    }, 520);
-
-    const availableWidth =
-      window.innerWidth - DRAWER_LEFT_WIDTH - DRAWER_RIGHT_WIDTH;
-    const screenCenterX = DRAWER_LEFT_WIDTH + availableWidth / 2;
-    scaleRef.current = 1;
-    offsetRef.current = {
-      x: screenCenterX - card.offsetLeft - card.offsetWidth / 2,
-      y: 156 - card.offsetTop,
-    };
-
-    transform.style.transform = `translate(${offsetRef.current.x}px, ${offsetRef.current.y}px) scale(${scaleRef.current})`;
-    canvas.style.backgroundSize = `${GRID_SIZE}px ${GRID_SIZE}px`;
-    canvas.style.backgroundPosition = `${offsetRef.current.x % GRID_SIZE}px ${
-      offsetRef.current.y % GRID_SIZE
-    }px`;
-    setZoomLabel(100);
-  };
-
-  const resetView = () => {
-    const canvas = canvasRef.current;
-    const transform = transformRef.current;
-    if (!canvas || !transform) return;
-    scaleRef.current = 1;
-    offsetRef.current = { x: DRAWER_LEFT_WIDTH + 40, y: 156 };
-    transform.style.transition =
-      "transform 0.48s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-    transform.style.transform = `translate(${offsetRef.current.x}px, ${offsetRef.current.y}px) scale(1)`;
-    canvas.style.backgroundSize = `${GRID_SIZE}px ${GRID_SIZE}px`;
-    canvas.style.backgroundPosition = `${offsetRef.current.x % GRID_SIZE}px ${
-      offsetRef.current.y % GRID_SIZE
-    }px`;
-    window.setTimeout(() => {
-      transform.style.transition = "";
-    }, 520);
-    setZoomLabel(100);
-  };
+  useEffect(() => {
+    if (!selectedComponentId) return;
+    window.requestAnimationFrame(() => flyToCard(selectedComponentId));
+  }, [flyToCard, selectedComponentId]);
 
   return (
     <section
@@ -298,14 +268,14 @@ export function Canvas({
           </span>
           <button
             type="button"
-            onClick={flyToSelected}
+            onClick={() => flyToCard(selectedComponentId)}
             className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-slate-200 transition hover:bg-white/10"
           >
             Focus {selectedComponent?.name ?? "selected"}
           </button>
           <button
             type="button"
-            onClick={resetView}
+            onClick={() => resetCanvasView()}
             className="rounded-full bg-violet-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-violet-400"
           >
             Reset view

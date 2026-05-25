@@ -160,6 +160,7 @@ export function StudioShell() {
   return (
     <div className="min-h-screen bg-[#0b1020] text-slate-100">
       <BuilderDrawerLeft
+        selectedComponentId={selectedComponent?.id ?? ""}
         previewScheme={previewScheme}
         onChangePreviewScheme={setPreviewScheme}
         onSelectComponent={setSelectedComponentId}
