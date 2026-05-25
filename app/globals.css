@@ -45,6 +45,7 @@ select {
 .studio-root {
     --studio-drawer-left-width: calc(var(--bambi-space-5) * 11);
     --studio-drawer-right-width: calc(var(--bambi-space-5) * 16);
+    --studio-canvas-card-width: calc(var(--bambi-space-5) * 36);
     min-height: 100vh;
     background: var(--bambi-background);
     color: var(--bambi-foreground);
@@ -523,9 +524,15 @@ select {
 
 .card {
     display: flex;
-    width: max-content;
+    width: min(
+        var(--studio-canvas-card-width),
+        calc(100vw - (var(--bambi-space-4) * 3))
+    );
     min-width: 0;
-    max-width: min(720px, calc(100vw - 3rem));
+    max-width: min(
+        var(--studio-canvas-card-width),
+        calc(100vw - (var(--bambi-space-4) * 3))
+    );
     flex-direction: column;
     align-items: start;
     gap: 1rem;
@@ -533,20 +540,28 @@ select {
     border-radius: 1.5rem;
     background: color-mix(in oklch, var(--bambi-card) 92%, transparent);
     color: var(--bambi-card-foreground);
-    padding: 1rem;
+    padding: var(--bambi-space-4);
     box-shadow: var(--bambi-shadow-lg);
 }
 
 .cardHeader {
     display: flex;
     width: 100%;
+    min-width: 0;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--bambi-space-4);
+}
+
+.cardHeader > * {
+    min-width: 0;
 }
 
 .studio-hero-card {
-    width: min(720px, calc(100vw - 3rem));
+    width: min(
+        var(--studio-canvas-card-width),
+        calc(100vw - (var(--bambi-space-4) * 3))
+    );
     background:
         radial-gradient(
             circle at top left,
@@ -568,8 +583,8 @@ select {
 }
 
 .component-description {
-    margin: 0.25rem 0 0;
-    max-width: 40rem;
+    margin: var(--bambi-space-1) 0 0;
+    max-width: calc(var(--bambi-space-5) * 32);
     color: var(--bambi-muted-foreground);
     font-family: var(--bambi-font-sans);
     font-size: var(--bambi-text-sm);
@@ -577,16 +592,37 @@ select {
 }
 
 .component-preview-card {
-    width: min(720px, calc(100vw - 3rem));
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.bambi-preview > * {
+    max-width: 100%;
+}
+
+.bambi-preview [data-bambi-card],
+.bambi-preview [data-bambi-container],
+.bambi-preview [data-bambi-aspect-ratio],
+.bambi-preview [data-bambi-tabs],
+.bambi-preview [data-bambi-accordion] {
+    max-width: 100%;
+}
+
+.bambi-preview [data-bambi-code][data-variant="block"] {
+    max-width: 100%;
+    overflow: auto;
 }
 
 .preview-section {
     display: flex;
     width: 100%;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--bambi-space-2);
     border-top: 1px solid var(--bambi-separator);
-    padding-top: 0.75rem;
+    padding-top: var(--bambi-space-3);
 }
 
 .preview-section-label {
