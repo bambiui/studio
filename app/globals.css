@@ -195,11 +195,10 @@ select {
 }
 
 .studio-brand-logo {
-    display: flex;
+    display: block;
     width: calc(var(--bambi-space-3) * 2);
     height: calc(var(--bambi-space-3) * 2);
-    border-radius: var(--bambi-radius-md);
-    background: var(--bambi-primary);
+    flex: none;
 }
 
 .studio-brand-name {

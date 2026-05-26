@@ -36,7 +36,13 @@ export function BuilderDrawerLeft({
           onClick={() => onSelectComponent(studioComponents[0]?.id ?? "")}
           className="studio-brand"
         >
-          <span className="studio-brand-logo" />
+          <img
+            className="studio-brand-logo"
+            src="https://bambiui.com/registry/assets/favicon.svg"
+            alt=""
+            width="24"
+            height="24"
+          />
           <span className="studio-brand-name">bambiui</span>
         </Button>
       </div>
