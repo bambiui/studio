@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,10 +12,18 @@ import {
 } from "../registry/components";
 import type { StudioStyle } from "../types";
 
+interface CanvasControls {
+  zoomLabel: number;
+  selectedComponentName: string | null;
+  onFocusSelected: () => void;
+  onResetView: () => void;
+}
+
 interface CanvasProps {
   selectedComponentId: string;
   onSelectComponent: (componentId: string) => void;
   previewStyle: StudioStyle;
+  onControlsChange: (controls: CanvasControls) => void;
 }
 
 const MIN_SCALE = 0.1;
@@ -24,15 +31,17 @@ const MAX_SCALE = 4;
 const GRID_SIZE = 16;
 const DRAWER_LEFT_WIDTH = 220;
 const DRAWER_RIGHT_WIDTH = 320;
+const CANVAS_TOP_OFFSET = 112;
 
 export function Canvas({
   selectedComponentId,
   onSelectComponent,
   previewStyle,
+  onControlsChange,
 }: CanvasProps) {
   const canvasRef = useRef<HTMLElement>(null);
   const transformRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef({ x: DRAWER_LEFT_WIDTH + 40, y: 156 });
+  const offsetRef = useRef({ x: DRAWER_LEFT_WIDTH + 40, y: CANVAS_TOP_OFFSET });
   const scaleRef = useRef(1);
   const draggingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
@@ -97,7 +106,7 @@ export function Canvas({
 
   const resetCanvasView = useCallback(
     (animated = true) => {
-      offsetRef.current = { x: DRAWER_LEFT_WIDTH + 40, y: 156 };
+      offsetRef.current = { x: DRAWER_LEFT_WIDTH + 40, y: CANVAS_TOP_OFFSET };
       scaleRef.current = 1;
       applyTransform(animated);
     },
@@ -119,7 +128,7 @@ export function Canvas({
       scaleRef.current = 1;
       offsetRef.current = {
         x: screenCenterX - left - width / 2,
-        y: 156 - top,
+        y: CANVAS_TOP_OFFSET - top,
       };
       applyTransform(animated);
     },
@@ -249,6 +258,22 @@ export function Canvas({
   }, [applyTransform, flyToCard, resetCanvasView, selectedComponentId, zoomAt]);
 
   useEffect(() => {
+    onControlsChange({
+      zoomLabel,
+      selectedComponentName: selectedComponent?.name ?? null,
+      onFocusSelected: () => flyToCard(selectedComponentId),
+      onResetView: () => resetCanvasView(),
+    });
+  }, [
+    flyToCard,
+    onControlsChange,
+    resetCanvasView,
+    selectedComponent?.name,
+    selectedComponentId,
+    zoomLabel,
+  ]);
+
+  useEffect(() => {
     if (!selectedComponentId) return;
     window.requestAnimationFrame(() => flyToCard(selectedComponentId));
   }, [flyToCard, selectedComponentId]);
@@ -260,40 +285,6 @@ export function Canvas({
       aria-label="BambiUI Studio free canvas"
       className="studio-canvas-shell"
     >
-      <div className="studio-canvas-toolbar" aria-label="Canvas controls">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--bambi-primary)]">
-            Free canvas
-          </p>
-          <p className="mt-1 text-xs text-[var(--bambi-muted-foreground)]">
-            Space + drag pan · wheel pan · Cmd/Ctrl + wheel zoom · Cmd/Ctrl + 0
-            reset
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-[var(--bambi-border)] bg-[var(--bambi-muted)] px-3 py-1 text-xs text-[var(--bambi-muted-foreground)]">
-            {zoomLabel}%
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => flyToCard(selectedComponentId)}
-            className="rounded-full px-3 py-1 text-xs"
-          >
-            Focus {selectedComponent?.name ?? "selected"}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => resetCanvasView()}
-            className="rounded-full px-3 py-1 text-xs"
-          >
-            Reset view
-          </Button>
-        </div>
-      </div>
-
       <div id="canvas-transform" ref={transformRef}>
         {studioComponents.map((component) => (
           <CanvasCard
@@ -322,11 +313,30 @@ function CanvasCard({
   onSelect,
   previewStyle,
 }: CanvasCardProps) {
+  const handleCardClick = (event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest(".bambi-preview")) return;
+    onSelect();
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <Card
       id={`card-${component.id}`}
       className={`card studio-component-card ${isSelected ? "active" : ""}`}
       data-card={component.id}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
     >
       <CardHeader className="cardHeader">
         <div>
@@ -337,15 +347,6 @@ function CanvasCard({
             {component.description}
           </CardDescription>
         </div>
-        <Button
-          type="button"
-          variant={isSelected ? "primary" : "outline"}
-          size="sm"
-          onClick={onSelect}
-          className="rounded-full px-3 py-1 text-xs"
-        >
-          {isSelected ? "Selected" : "Inspect"}
-        </Button>
       </CardHeader>
       <CardContent
         className="bambi-preview component-preview-card rounded-[1.25rem] border border-[var(--bambi-border)] bg-[var(--bambi-background)] p-6 text-[var(--bambi-foreground)]"

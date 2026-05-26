@@ -8,7 +8,9 @@ function toGamma(c: number) {
   return c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
 }
 
-function hexToOklch(hex: string): { hue: number; chroma: number } | null {
+export function hexToOklch(
+  hex: string,
+): { hue: number; chroma: number } | null {
   const clean = hex.replace("#", "");
   if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
 
@@ -221,14 +223,27 @@ export function generateColorTokens(
   return tokens;
 }
 
-export function createThemeFromBaseColor(hexColor: string): TokenOverrides {
-  const color = hexToOklch(hexColor) ?? { hue: 271, chroma: 0.22 };
-  return generateColorTokens(color.hue, color.chroma, 46);
+export const DEFAULT_GENERATOR_HUE = 271;
+export const DEFAULT_GENERATOR_CHROMA = 0.22;
+export const DEFAULT_BASE_SLIDER_VALUE = 46;
+
+export function createThemeFromBaseColor(
+  hexColor: string,
+  base = DEFAULT_BASE_SLIDER_VALUE,
+): TokenOverrides {
+  const color = hexToOklch(hexColor) ?? {
+    hue: DEFAULT_GENERATOR_HUE,
+    chroma: DEFAULT_GENERATOR_CHROMA,
+  };
+  return generateColorTokens(color.hue, color.chroma, base);
 }
 
-export function createDarkThemeFromBaseColor(hexColor: string): TokenOverrides {
+export function createDarkThemeFromBaseColor(
+  hexColor: string,
+  base = DEFAULT_BASE_SLIDER_VALUE,
+): TokenOverrides {
   return {
-    ...createThemeFromBaseColor(hexColor),
+    ...createThemeFromBaseColor(hexColor, base),
     "--bambi-background": "var(--bambi-neutral-950)",
     "--bambi-foreground": "var(--bambi-neutral-50)",
     "--bambi-card": "var(--bambi-neutral-900)",

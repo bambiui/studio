@@ -1,9 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
+import {
+  Slider,
+  SliderRange,
+  SliderThumb,
+  SliderTrack,
+} from "@/src/components/ui/slider";
+import { PREVIEW_SCHEMES } from "../constants";
 import type { StudioComponentDefinition } from "../registry/components";
 import { getContrastReport } from "../theme/contrast";
-import { isValidHexColor } from "../theme/generator";
+import {
+  DEFAULT_BASE_SLIDER_VALUE,
+  DEFAULT_GENERATOR_CHROMA,
+  DEFAULT_GENERATOR_HUE,
+  hexToOklch,
+  isValidHexColor,
+  oklchToHex,
+} from "../theme/generator";
 import { themePresets } from "../theme/presets";
 import { editableTokenDefaults, type TokenOverrides } from "../tokens/defaults";
 import {
@@ -20,15 +34,22 @@ interface InspectorPanelProps {
   previewScheme: PreviewScheme;
   onUpdateToken: (tokenId: string, value: string) => void;
   onResetTokens: () => void;
-  onApplyGeneratedTheme: (baseColor: string) => void;
-  onApplyGeneratedDarkTheme: (baseColor: string) => void;
+  onApplyGeneratedTheme: (baseColor: string, baseValue: number) => void;
+  onApplyGeneratedDarkTheme: (baseColor: string, baseValue: number) => void;
 }
+
+const HUE_GRADIENT =
+  "linear-gradient(to right,#ff3b3b,#ffb13b,#fff43b,#52d66b,#36d6c7,#3b7bff,#b63bff,#ff3ba7,#ff3b3b)";
 
 function ratingClassName(rating: string): string {
   if (rating === "strong") return "studio-rating-strong";
   if (rating === "moderate") return "studio-rating-moderate";
   if (rating === "weak") return "studio-rating-weak";
   return "studio-rating-unknown";
+}
+
+function normalizeHex(value: string): string {
+  return value.startsWith("#") ? value : `#${value}`;
 }
 
 export function InspectorPanel({
@@ -40,12 +61,17 @@ export function InspectorPanel({
   onApplyGeneratedTheme,
   onApplyGeneratedDarkTheme,
 }: InspectorPanelProps) {
-  const [baseColor, setBaseColor] = useState(themePresets[0]?.color ?? "");
+  const [genHue, setGenHue] = useState(DEFAULT_GENERATOR_HUE);
+  const [genChroma, setGenChroma] = useState(DEFAULT_GENERATOR_CHROMA);
+  const [hexValue, setHexValue] = useState(
+    oklchToHex(0.55, DEFAULT_GENERATOR_CHROMA, DEFAULT_GENERATOR_HUE),
+  );
+  const [baseValue, setBaseValue] = useState(DEFAULT_BASE_SLIDER_VALUE);
   const [tokenQuery, setTokenQuery] = useState("");
   const [activeTokenGroup, setActiveTokenGroup] = useState<TokenGroup | "All">(
     "All",
   );
-  const canGenerateTheme = isValidHexColor(baseColor);
+  const canGenerateTheme = isValidHexColor(normalizeHex(hexValue));
   const normalizedTokenQuery = tokenQuery.trim().toLowerCase();
   const baseTokenIds = normalizedTokenQuery
     ? tokenDefinitions.map((token) => token.id)
@@ -71,9 +97,45 @@ export function InspectorPanel({
       .includes(normalizedTokenQuery);
   });
   const contrastReport = getContrastReport(
-    tokenOverrides,
+    { ...tokenOverrides, ...PREVIEW_SCHEMES[previewScheme] },
     editableTokenDefaults,
   );
+
+  const applyGeneratedTokens = (hex: string, base: number) => {
+    const normalizedHex = normalizeHex(hex);
+    if (!isValidHexColor(normalizedHex)) return;
+
+    if (previewScheme === "dark") {
+      onApplyGeneratedDarkTheme(normalizedHex, base);
+    } else {
+      onApplyGeneratedTheme(normalizedHex, base);
+    }
+  };
+
+  const updateFromHex = (nextValue: string, apply = true) => {
+    const normalizedHex = normalizeHex(nextValue);
+    setHexValue(normalizedHex);
+    const parsed = hexToOklch(normalizedHex);
+    if (!parsed || parsed.chroma <= 0.01) return;
+
+    setGenHue(Math.round(parsed.hue));
+    setGenChroma(Number(parsed.chroma.toFixed(3)));
+    if (apply) applyGeneratedTokens(normalizedHex, baseValue);
+  };
+
+  const updateFromHue = (nextHue: number) => {
+    const normalizedHue = Math.max(0, Math.min(360, Math.round(nextHue)));
+    const nextHex = oklchToHex(0.55, genChroma, normalizedHue);
+    setGenHue(normalizedHue);
+    setHexValue(nextHex);
+    applyGeneratedTokens(nextHex, baseValue);
+  };
+
+  const updateFromBase = (nextBase: number) => {
+    const normalizedBase = Math.max(0, Math.min(100, Math.round(nextBase)));
+    setBaseValue(normalizedBase);
+    applyGeneratedTokens(hexValue, normalizedBase);
+  };
 
   return (
     <aside className="w-full shrink-0 border-t border-[var(--bambi-border)] bg-[var(--bambi-card)] p-5 text-[var(--bambi-card-foreground)] xl:w-80 xl:border-l xl:border-t-0">
@@ -98,23 +160,60 @@ export function InspectorPanel({
           Tek bir base renkten primary, neutral, intent scale ve bağlı semantic
           tokenları üret.
         </p>
+        <label className="mt-4 block">
+          <span className="mb-2 flex items-center justify-between text-xs font-medium text-[var(--bambi-muted-foreground)]">
+            <span>Primary Color</span>
+            <span>{genHue}°</span>
+          </span>
+          <Input
+            type="range"
+            min={0}
+            max={360}
+            value={genHue}
+            onChange={(event) => updateFromHue(Number(event.target.value))}
+            className="h-3 w-full cursor-pointer appearance-none rounded-full border-0 p-0"
+            style={{ background: HUE_GRADIENT }}
+            aria-label="Primary color hue"
+          />
+        </label>
         <div className="mt-4 flex gap-2">
           <Input
             type="color"
-            value={
-              canGenerateTheme ? baseColor : (themePresets[0]?.color ?? "")
-            }
-            onChange={(event) => setBaseColor(event.target.value)}
+            value={canGenerateTheme ? normalizeHex(hexValue) : "#7c3aed"}
+            onChange={(event) => updateFromHex(event.target.value)}
             className="h-10 w-12 rounded-xl border border-[var(--bambi-border)] bg-transparent p-1"
-            aria-label="Base color"
+            aria-label="Hex color picker"
           />
           <Input
-            value={baseColor}
-            onChange={(event) => setBaseColor(event.target.value)}
+            value={hexValue}
+            maxLength={7}
+            spellCheck={false}
+            onChange={(event) => updateFromHex(event.target.value)}
             className="min-w-0 flex-1 rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-input-background)] px-3 py-2 text-sm text-[var(--bambi-input-foreground)]"
-            placeholder="Base color"
+            placeholder="#7c3aed"
           />
         </div>
+        <label className="mt-4 block">
+          <span className="mb-2 flex items-center justify-between text-xs font-medium text-[var(--bambi-muted-foreground)]">
+            <span>Base</span>
+            <span>{baseValue}</span>
+          </span>
+          <Slider
+            value={[baseValue]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(detail) =>
+              updateFromBase(detail.value[0] ?? DEFAULT_BASE_SLIDER_VALUE)
+            }
+            aria-label="Base color balance"
+          >
+            <SliderTrack>
+              <SliderRange />
+            </SliderTrack>
+            <SliderThumb />
+          </Slider>
+        </label>
         <div className="mt-3 grid grid-cols-5 gap-2">
           {themePresets.map((preset) => (
             <Button
@@ -123,12 +222,7 @@ export function InspectorPanel({
               variant="outline"
               title={preset.name}
               onClick={() => {
-                setBaseColor(preset.color);
-                if (previewScheme === "dark") {
-                  onApplyGeneratedDarkTheme(preset.color);
-                } else {
-                  onApplyGeneratedTheme(preset.color);
-                }
+                updateFromHex(preset.color);
               }}
               className="flex h-9 items-center justify-center rounded-xl border border-[var(--bambi-border)] text-[10px] font-medium text-[var(--bambi-color-white)]"
               style={{ background: preset.color }}
@@ -141,15 +235,11 @@ export function InspectorPanel({
           type="button"
           disabled={!canGenerateTheme}
           onClick={() => {
-            if (previewScheme === "dark") {
-              onApplyGeneratedDarkTheme(baseColor);
-            } else {
-              onApplyGeneratedTheme(baseColor);
-            }
+            applyGeneratedTokens(hexValue, baseValue);
           }}
           className="mt-3 w-full rounded-xl px-4 py-2 text-sm font-medium"
         >
-          Generate {previewScheme} theme
+          Apply {previewScheme} theme
         </Button>
       </section>
 
@@ -158,7 +248,8 @@ export function InspectorPanel({
           Contrast report
         </h3>
         <p className="mt-2 text-xs leading-5 text-[var(--bambi-muted-foreground)]">
-          OKLCH lightness farkına göre hızlı okunabilirlik sinyali.
+          Aktif light/dark scheme ve token override&apos;larıyla WCAG contrast
+          ratio.
         </p>
         <div className="mt-4 space-y-2">
           {contrastReport.map((item) => (
@@ -177,7 +268,8 @@ export function InspectorPanel({
                 </span>
               </div>
               <p className="mt-2 text-xs text-[var(--bambi-muted-foreground)]">
-                Score: {item.score === null ? "n/a" : item.score.toFixed(0)}
+                Ratio:{" "}
+                {item.score === null ? "n/a" : `${item.score.toFixed(2)}:1`}
               </p>
             </div>
           ))}

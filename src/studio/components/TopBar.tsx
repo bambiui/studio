@@ -1,11 +1,19 @@
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 
+export interface CanvasHeaderControls {
+  zoomLabel: number;
+  selectedComponentName: string | null;
+  onFocusSelected: () => void;
+  onResetView: () => void;
+}
+
 interface TopBarProps {
   tokenCount: number;
   importMessage: string | null;
   canUndo: boolean;
   canRedo: boolean;
+  canvasControls: CanvasHeaderControls | null;
   onImportTheme: (file: File) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -17,6 +25,7 @@ export function TopBar({
   importMessage,
   canUndo,
   canRedo,
+  canvasControls,
   onImportTheme,
   onUndo,
   onRedo,
@@ -24,16 +33,47 @@ export function TopBar({
 }: TopBarProps) {
   return (
     <header className="studio-topbar">
-      <div>
-        <p className="studio-kicker">BambiUI Platform</p>
-        <div className="studio-title-row">
-          <h1 className="studio-title">Studio</h1>
-          {importMessage ? (
-            <span className="studio-muted-note">{importMessage}</span>
-          ) : null}
+      <div className="studio-topbar-heading">
+        <div>
+          <p className="studio-kicker">BambiUI Platform</p>
+          <div className="studio-title-row">
+            <h1 className="studio-title">Studio</h1>
+            {importMessage ? (
+              <span className="studio-muted-note">{importMessage}</span>
+            ) : null}
+          </div>
+        </div>
+        <div className="studio-canvas-heading" aria-label="Canvas mode">
+          <span className="studio-canvas-heading-title">Free canvas</span>
+          <span className="studio-muted-note">
+            Space + drag pan · wheel pan · Cmd/Ctrl + wheel zoom · Cmd/Ctrl + 0
+            reset
+          </span>
         </div>
       </div>
       <div className="studio-topbar-actions">
+        {canvasControls ? (
+          <div className="studio-inline-actions" aria-label="Canvas controls">
+            <span className="studio-pill">{canvasControls.zoomLabel}%</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={canvasControls.onFocusSelected}
+              className="studio-action-button"
+            >
+              Focus {canvasControls.selectedComponentName ?? "selected"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={canvasControls.onResetView}
+              className="studio-action-button"
+            >
+              Reset view
+            </Button>
+          </div>
+        ) : null}
         <span className="studio-pill">{tokenCount} override</span>
         <div className="studio-button-group">
           <Button

@@ -46,6 +46,8 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogOverlay,
+  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/src/components/ui/dialog";
@@ -53,6 +55,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -115,7 +118,25 @@ export interface StudioComponentDefinition {
   statePreview?: ReactNode;
 }
 
-export const studioComponents: StudioComponentDefinition[] = [
+const CORE_COMPONENT_IDS = new Set([
+  "accordion",
+  "button",
+  "card",
+  "checkbox",
+  "combobox",
+  "dialog",
+  "dropdown-menu",
+  "input",
+  "popover",
+  "radio-group",
+  "select",
+  "slider",
+  "switch",
+  "tabs",
+  "textarea",
+]);
+
+const allStudioComponents: StudioComponentDefinition[] = [
   {
     id: "button",
     name: "Button",
@@ -487,10 +508,16 @@ export const studioComponents: StudioComponentDefinition[] = [
       "--bambi-radius-md",
     ],
     preview: (
-      <Combobox defaultValue="button" placeholder="Search component…" open>
+      <Combobox defaultValue="button" placeholder="Search component…">
         <div className="flex max-w-sm gap-2">
           <ComboboxInput />
-          <ComboboxTrigger>⌄</ComboboxTrigger>
+          <ComboboxTrigger
+            data-bambi-button=""
+            data-variant="primary"
+            data-size="md"
+          >
+            Search
+          </ComboboxTrigger>
         </div>
         <ComboboxContent>
           <ComboboxList>
@@ -533,15 +560,23 @@ export const studioComponents: StudioComponentDefinition[] = [
     ],
     preview: (
       <Dialog defaultOpen={false}>
-        <DialogTrigger>Open dialog</DialogTrigger>
-        <div className="mt-3 rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-popover)] p-4 shadow-[var(--bambi-shadow-md)]">
-          <DialogTitle>Export theme</DialogTitle>
-          <DialogDescription>
-            Dialog content uses popover, border, radius and shadow tokens.
-          </DialogDescription>
-          <DialogClose className="mt-3">Close</DialogClose>
-        </div>
-        <DialogContent hidden />
+        <DialogTrigger
+          data-bambi-button=""
+          data-variant="primary"
+          data-size="md"
+        >
+          Open dialog
+        </DialogTrigger>
+        <DialogPortal>
+          <DialogOverlay />
+          <DialogContent>
+            <DialogTitle>Export theme</DialogTitle>
+            <DialogDescription>
+              Dialog content uses popover, border, radius and shadow tokens.
+            </DialogDescription>
+            <DialogClose className="mt-3">Close</DialogClose>
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
     ),
   },
@@ -557,15 +592,23 @@ export const studioComponents: StudioComponentDefinition[] = [
       "--bambi-radius-md",
     ],
     preview: (
-      <DropdownMenu open>
-        <DropdownMenuTrigger>Theme actions</DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Export as</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>CSS variables</DropdownMenuItem>
-          <DropdownMenuItem>Bambi preset</DropdownMenuItem>
-          <DropdownMenuItem>JSON tokens</DropdownMenuItem>
-        </DropdownMenuContent>
+      <DropdownMenu defaultOpen={false}>
+        <DropdownMenuTrigger
+          data-bambi-button=""
+          data-variant="primary"
+          data-size="md"
+        >
+          Theme actions
+        </DropdownMenuTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Export as</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>CSS variables</DropdownMenuItem>
+            <DropdownMenuItem>Bambi preset</DropdownMenuItem>
+            <DropdownMenuItem>JSON tokens</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
       </DropdownMenu>
     ),
   },
@@ -612,8 +655,14 @@ export const studioComponents: StudioComponentDefinition[] = [
       "--bambi-shadow-md",
     ],
     preview: (
-      <Popover open>
-        <PopoverTrigger>Edit token</PopoverTrigger>
+      <Popover defaultOpen={false} portal>
+        <PopoverTrigger
+          data-bambi-button=""
+          data-variant="primary"
+          data-size="md"
+        >
+          Edit token
+        </PopoverTrigger>
         <PopoverContent className="mt-3 max-w-xs">
           <strong>Primary hue</strong>
           <p className="mt-1 text-sm text-[var(--bambi-muted-foreground)]">
@@ -659,7 +708,11 @@ export const studioComponents: StudioComponentDefinition[] = [
       "--bambi-radius-md",
     ],
     preview: (
-      <Select defaultValue="primary" placeholder="Choose scale" open>
+      <Select
+        defaultValue="primary"
+        placeholder="Choose scale"
+        defaultOpen={false}
+      >
         <SelectTrigger>
           <SelectValuePart />
         </SelectTrigger>
@@ -727,8 +780,14 @@ export const studioComponents: StudioComponentDefinition[] = [
       "--bambi-shadow-sm",
     ],
     preview: (
-      <Tooltip open>
-        <TooltipTrigger>Hover for token hint</TooltipTrigger>
+      <Tooltip defaultOpen={false} portal>
+        <TooltipTrigger
+          data-bambi-button=""
+          data-variant="primary"
+          data-size="md"
+        >
+          Hover for token hint
+        </TooltipTrigger>
         <TooltipContent className="mt-2">
           Uses semantic popover tokens.
         </TooltipContent>
@@ -736,6 +795,10 @@ export const studioComponents: StudioComponentDefinition[] = [
     ),
   },
 ];
+
+export const studioComponents = allStudioComponents.filter((component) =>
+  CORE_COMPONENT_IDS.has(component.id),
+);
 
 function TabsPreview() {
   return (

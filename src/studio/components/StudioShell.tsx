@@ -14,7 +14,7 @@ import { BuilderDrawerLeft } from "./BuilderDrawerLeft";
 import { Canvas } from "./Canvas";
 import { ExportDialog } from "./ExportDialog";
 import { InspectorPanel } from "./InspectorPanel";
-import { TopBar } from "./TopBar";
+import { TopBar, type CanvasHeaderControls } from "./TopBar";
 
 export function StudioShell() {
   const [selectedComponentId, setSelectedComponentId] = useState(
@@ -27,6 +27,8 @@ export function StudioShell() {
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
   const [previewScheme, setPreviewScheme] = useState<PreviewScheme>("light");
   const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [canvasControls, setCanvasControls] =
+    useState<CanvasHeaderControls | null>(null);
 
   useEffect(() => {
     try {
@@ -138,17 +140,17 @@ export function StudioShell() {
     return () => window.removeEventListener("keydown", handleShortcut);
   });
 
-  const applyGeneratedTheme = (baseColor: string) => {
+  const applyGeneratedTheme = (baseColor: string, baseValue: number) => {
     commitTokenOverrides((current) => ({
       ...current,
-      ...createThemeFromBaseColor(baseColor),
+      ...createThemeFromBaseColor(baseColor, baseValue),
     }));
   };
 
-  const applyGeneratedDarkTheme = (baseColor: string) => {
+  const applyGeneratedDarkTheme = (baseColor: string, baseValue: number) => {
     commitTokenOverrides((current) => ({
       ...current,
-      ...createDarkThemeFromBaseColor(baseColor),
+      ...createDarkThemeFromBaseColor(baseColor, baseValue),
     }));
     setPreviewScheme("dark");
   };
@@ -181,6 +183,7 @@ export function StudioShell() {
             importMessage={importMessage}
             canUndo={historyPast.length > 0}
             canRedo={historyFuture.length > 0}
+            canvasControls={canvasControls}
             onImportTheme={importTheme}
             onUndo={undoThemeChange}
             onRedo={redoThemeChange}
@@ -191,6 +194,7 @@ export function StudioShell() {
           selectedComponentId={selectedComponentId}
           onSelectComponent={setSelectedComponentId}
           previewStyle={previewStyle}
+          onControlsChange={setCanvasControls}
         />
       </main>
       <div

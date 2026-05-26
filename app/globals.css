@@ -73,7 +73,7 @@ select {
     gap: var(--bambi-space-4);
     border-bottom: 1px solid var(--bambi-border);
     background: color-mix(in oklch, var(--bambi-card) 95%, transparent);
-    padding-inline: calc(var(--bambi-space-3) * 2);
+    padding: var(--bambi-space-3) calc(var(--bambi-space-3) * 2);
     color: var(--bambi-card-foreground);
 }
 
@@ -89,10 +89,36 @@ select {
 .studio-topbar-actions,
 .studio-button-group,
 .studio-brand,
-.studio-inline-actions {
+.studio-inline-actions,
+.studio-topbar-heading,
+.studio-canvas-heading {
     display: flex;
     align-items: center;
     gap: var(--bambi-space-3);
+}
+
+.studio-topbar-heading {
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.studio-canvas-heading {
+    min-width: 0;
+    border-left: 1px solid var(--bambi-border);
+    padding-left: var(--bambi-space-3);
+}
+
+.studio-canvas-heading-title {
+    color: var(--bambi-primary);
+    font-size: var(--bambi-text-xs);
+    font-weight: var(--bambi-font-weight-semibold);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.studio-topbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .studio-title {
@@ -502,26 +528,6 @@ select {
     will-change: transform;
 }
 
-.studio-canvas-toolbar {
-    position: absolute;
-    top: 8.75rem;
-    left: 15rem;
-    right: 21rem;
-    z-index: 2;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border: 1px solid var(--bambi-border);
-    border-radius: 1.25rem;
-    background: color-mix(in oklch, var(--bambi-card) 88%, transparent);
-    color: var(--bambi-card-foreground);
-    padding: 0.875rem 1rem;
-    backdrop-filter: blur(16px);
-    pointer-events: auto;
-}
-
 .card {
     display: flex;
     width: min(
@@ -632,17 +638,4 @@ select {
     font-weight: var(--bambi-font-weight-semibold);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-}
-
-@media (max-width: 1280px) {
-    .studio-canvas-toolbar {
-        right: 1rem;
-    }
-}
-
-@media (max-width: 1024px) {
-    .studio-canvas-toolbar {
-        left: 1rem;
-        top: 10rem;
-    }
 }
