@@ -1,4 +1,3 @@
-import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import {
   Slider,
@@ -16,32 +15,12 @@ interface TokenValueControlProps {
   onChange: (value: string) => void;
 }
 
-const COLOR_PRESETS = [
-  "oklch(55% 0.22 271)",
-  "oklch(62% 0.22 255)",
-  "oklch(65% 0.233 28)",
-  "oklch(73% 0.194 153)",
-  "oklch(78% 0.159 74)",
-] as const;
-
-const RADIUS_PRESETS = [
-  "0",
-  "0.25rem",
-  "0.5rem",
-  "0.75rem",
-  "1rem",
-  "9999px",
-] as const;
-
 export function TokenValueControl({
-  tokenId,
   token,
   value,
   placeholder,
   onChange,
 }: TokenValueControlProps) {
-  const visibleValue = value || placeholder;
-
   if (token?.kind === "opacity") {
     const numericValue = Number.parseFloat(value || placeholder || "0.5");
     const safeValue = Number.isFinite(numericValue) ? numericValue : 0.5;
@@ -84,46 +63,6 @@ export function TokenValueControl({
           className="w-full rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-input-background)] px-3 py-2 text-xs text-[var(--bambi-input-foreground)]"
         />
       </label>
-
-      {token?.kind === "color" ? (
-        <div
-          className="mt-2 flex flex-wrap gap-2"
-          aria-label={`${tokenId} color presets`}
-        >
-          {COLOR_PRESETS.map((preset) => (
-            <Button
-              key={preset}
-              type="button"
-              variant="outline"
-              title={preset}
-              onClick={() => onChange(preset)}
-              className={`h-6 w-6 rounded-full border p-0 ${
-                visibleValue === preset
-                  ? "border-[var(--bambi-foreground)] ring-2 ring-[var(--bambi-primary)]"
-                  : "border-[var(--bambi-border)]"
-              }`}
-              style={{ background: preset }}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      {token?.kind === "radius" ? (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {RADIUS_PRESETS.map((preset) => (
-            <Button
-              key={preset}
-              type="button"
-              variant={visibleValue === preset ? "primary" : "outline"}
-              size="sm"
-              onClick={() => onChange(preset)}
-              className="rounded-full px-2 py-1 text-[10px]"
-            >
-              {preset}
-            </Button>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

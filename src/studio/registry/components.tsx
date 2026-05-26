@@ -106,7 +106,7 @@ import {
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 
-export type ComponentCategory = "Actions" | "Inputs" | "Display";
+export type ComponentCategory = "Actions" | "Inputs" | "Display" | "Foundation";
 
 export interface StudioComponentDefinition {
   id: string;
@@ -118,25 +118,97 @@ export interface StudioComponentDefinition {
   statePreview?: ReactNode;
 }
 
-const CORE_COMPONENT_IDS = new Set([
-  "accordion",
-  "button",
-  "card",
-  "checkbox",
-  "combobox",
-  "dialog",
-  "dropdown-menu",
-  "input",
-  "popover",
-  "radio-group",
-  "select",
-  "slider",
-  "switch",
-  "tabs",
-  "textarea",
-]);
+const COLOR_SCALE_STEPS = [
+  "50",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+] as const;
 
-const allStudioComponents: StudioComponentDefinition[] = [
+const COLOR_SCALE_NAMES = [
+  "primary",
+  "neutral",
+  "danger",
+  "success",
+  "warning",
+] as const;
+
+const COLOR_SCALE_TOKENS = COLOR_SCALE_NAMES.flatMap((name) =>
+  COLOR_SCALE_STEPS.map((step) => `--bambi-${name}-${step}`),
+);
+
+export const studioComponents: StudioComponentDefinition[] = [
+  {
+    id: "colors",
+    name: "Colors",
+    category: "Foundation",
+    description:
+      "Generated primitive, semantic and intent color tokens from the legacy Studio builder.",
+    tokenIds: [
+      ...COLOR_SCALE_TOKENS,
+      "--bambi-background",
+      "--bambi-foreground",
+      "--bambi-card",
+      "--bambi-card-foreground",
+      "--bambi-border",
+      "--bambi-separator",
+      "--bambi-primary",
+      "--bambi-primary-foreground",
+      "--bambi-secondary",
+      "--bambi-secondary-foreground",
+      "--bambi-accent",
+      "--bambi-accent-foreground",
+      "--bambi-muted",
+      "--bambi-muted-foreground",
+      "--bambi-danger",
+      "--bambi-danger-foreground",
+      "--bambi-success",
+      "--bambi-success-foreground",
+      "--bambi-warning",
+      "--bambi-warning-foreground",
+      "--bambi-ring",
+      "--bambi-input",
+      "--bambi-input-background",
+      "--bambi-input-foreground",
+      "--bambi-input-placeholder",
+    ],
+    preview: <ColorsPreview />,
+  },
+  {
+    id: "typography",
+    name: "Typography",
+    category: "Foundation",
+    description:
+      "Font, type scale, radius and shadow tokens from the legacy Studio builder.",
+    tokenIds: [
+      "--bambi-font-sans",
+      "--bambi-font-mono",
+      "--bambi-text-xs",
+      "--bambi-text-sm",
+      "--bambi-text-base",
+      "--bambi-text-lg",
+      "--bambi-font-weight-normal",
+      "--bambi-font-weight-medium",
+      "--bambi-font-weight-semibold",
+      "--bambi-font-weight-bold",
+      "--bambi-radius-sm",
+      "--bambi-radius-md",
+      "--bambi-radius-lg",
+      "--bambi-radius-xl",
+      "--bambi-radius-full",
+      "--bambi-shadow-sm",
+      "--bambi-shadow-md",
+      "--bambi-shadow-lg",
+    ],
+    preview: <TypographyPreview />,
+  },
   {
     id: "button",
     name: "Button",
@@ -796,10 +868,6 @@ const allStudioComponents: StudioComponentDefinition[] = [
   },
 ];
 
-export const studioComponents = allStudioComponents.filter((component) =>
-  CORE_COMPONENT_IDS.has(component.id),
-);
-
 function TabsPreview() {
   return (
     <Tabs defaultValue="preview" className="w-full max-w-md">
@@ -830,7 +898,118 @@ function TabsPreview() {
   );
 }
 
+function ColorsPreview() {
+  return (
+    <div className="grid gap-4">
+      {COLOR_SCALE_NAMES.map((name) => (
+        <div key={name}>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--bambi-muted-foreground)]">
+              {name}
+            </span>
+            <span className="text-xs text-[var(--bambi-muted-foreground)]">
+              scale
+            </span>
+          </div>
+          <div className="grid grid-cols-11 overflow-hidden rounded-xl border border-[var(--bambi-border)]">
+            {COLOR_SCALE_STEPS.map((step) => (
+              <div
+                key={`${name}-${step}`}
+                className="h-10"
+                style={{ background: `var(--bambi-${name}-${step})` }}
+                title={`--bambi-${name}-${step}`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+      <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        {[
+          ["Background", "--bambi-background"],
+          ["Foreground", "--bambi-foreground"],
+          ["Card", "--bambi-card"],
+          ["Primary", "--bambi-primary"],
+          ["Secondary", "--bambi-secondary"],
+          ["Accent", "--bambi-accent"],
+          ["Muted", "--bambi-muted"],
+          ["Ring", "--bambi-ring"],
+        ].map(([label, token]) => (
+          <div
+            key={token}
+            className="rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-card)] p-3"
+          >
+            <div
+              className="mb-2 h-8 rounded-lg border border-[var(--bambi-border)]"
+              style={{ background: `var(${token})` }}
+            />
+            <span className="text-xs text-[var(--bambi-muted-foreground)]">
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TypographyPreview() {
+  return (
+    <div className="grid gap-5">
+      <div className="grid gap-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--bambi-muted-foreground)]">
+          Type scale
+        </p>
+        <p style={{ fontSize: "var(--bambi-text-xs)" }}>
+          Text xs · The quick brown fox
+        </p>
+        <p style={{ fontSize: "var(--bambi-text-sm)" }}>
+          Text sm · The quick brown fox
+        </p>
+        <p style={{ fontSize: "var(--bambi-text-base)" }}>
+          Text base · The quick brown fox
+        </p>
+        <p style={{ fontSize: "var(--bambi-text-lg)" }}>
+          Text lg · The quick brown fox
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          ["Normal", "--bambi-font-weight-normal"],
+          ["Medium", "--bambi-font-weight-medium"],
+          ["Semibold", "--bambi-font-weight-semibold"],
+          ["Bold", "--bambi-font-weight-bold"],
+        ].map(([label, token]) => (
+          <div
+            key={token}
+            className="rounded-xl border border-[var(--bambi-border)] bg-[var(--bambi-muted)] p-3"
+            style={{ fontWeight: `var(${token})` }}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-5 gap-2">
+        {[
+          "--bambi-radius-sm",
+          "--bambi-radius-md",
+          "--bambi-radius-lg",
+          "--bambi-radius-xl",
+          "--bambi-radius-full",
+        ].map((token) => (
+          <div
+            key={token}
+            className="h-12 border border-[var(--bambi-border)] bg-[var(--bambi-primary)]"
+            style={{ borderRadius: `var(${token})` }}
+            title={token}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export const componentCategories: ComponentCategory[] = [
+  "Foundation",
   "Actions",
   "Inputs",
   "Display",

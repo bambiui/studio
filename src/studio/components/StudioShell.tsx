@@ -56,13 +56,13 @@ export function StudioShell() {
 
   const previewStyle = useMemo(
     () =>
-      ({ ...tokenOverrides, ...PREVIEW_SCHEMES[previewScheme] }) as StudioStyle,
+      ({ ...PREVIEW_SCHEMES[previewScheme], ...tokenOverrides }) as StudioStyle,
     [previewScheme, tokenOverrides],
   );
 
   const chromeStyle = useMemo(
     () =>
-      ({ ...tokenOverrides, ...PREVIEW_SCHEMES[previewScheme] }) as StudioStyle,
+      ({ ...PREVIEW_SCHEMES[previewScheme], ...tokenOverrides }) as StudioStyle,
     [previewScheme, tokenOverrides],
   );
 
@@ -152,7 +152,6 @@ export function StudioShell() {
       ...current,
       ...createDarkThemeFromBaseColor(baseColor, baseValue),
     }));
-    setPreviewScheme("dark");
   };
 
   const importTheme = async (file: File) => {

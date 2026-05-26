@@ -74,6 +74,24 @@ export function TopBar({
             </Button>
           </div>
         ) : null}
+        <Button
+          as="a"
+          href="https://bambiui.com/docs/"
+          variant="ghost"
+          size="sm"
+          className="studio-action-button"
+        >
+          Docs
+        </Button>
+        <Button
+          as="a"
+          href="https://bambiui.com"
+          variant="ghost"
+          size="sm"
+          className="studio-action-button"
+        >
+          bambiui.com
+        </Button>
         <span className="studio-pill">{tokenCount} override</span>
         <div className="studio-button-group">
           <Button

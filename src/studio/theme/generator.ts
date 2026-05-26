@@ -11,12 +11,19 @@ function toGamma(c: number) {
 export function hexToOklch(
   hex: string,
 ): { hue: number; chroma: number } | null {
-  const clean = hex.replace("#", "");
-  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
+  const clean = hex.trim().replace("#", "");
+  const normalized =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((part) => `${part}${part}`)
+          .join("")
+      : clean;
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null;
 
-  const r = toLinear(parseInt(clean.slice(0, 2), 16) / 255);
-  const g = toLinear(parseInt(clean.slice(2, 4), 16) / 255);
-  const b = toLinear(parseInt(clean.slice(4, 6), 16) / 255);
+  const r = toLinear(parseInt(normalized.slice(0, 2), 16) / 255);
+  const g = toLinear(parseInt(normalized.slice(2, 4), 16) / 255);
+  const b = toLinear(parseInt(normalized.slice(4, 6), 16) / 255);
   const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
@@ -220,6 +227,29 @@ export function generateColorTokens(
   addScale(tokens, "success", sH, 0.194, SUCCESS_SCALE);
   addScale(tokens, "warning", wHL, 0.159, WARNING_SCALE);
 
+  tokens["--bambi-primary"] = "var(--bambi-primary-500)";
+  tokens["--bambi-primary-foreground"] = bestFg(0.55, chroma, hue);
+  tokens["--bambi-ring"] = "var(--bambi-primary)";
+  tokens["--bambi-danger"] = "var(--bambi-danger-500)";
+  tokens["--bambi-danger-foreground"] = bestFg(0.65, 0.233, dHL);
+  tokens["--bambi-success"] = "var(--bambi-success-500)";
+  tokens["--bambi-success-foreground"] = bestFg(0.73, 0.194, sH);
+  tokens["--bambi-warning"] = "var(--bambi-warning-500)";
+  tokens["--bambi-warning-foreground"] = bestFg(0.78, 0.159, wHL);
+
+  tokens["--bambi-intent-primary-bg"] = "var(--bambi-primary)";
+  tokens["--bambi-intent-primary-fg"] = "var(--bambi-primary-foreground)";
+  tokens["--bambi-intent-primary-hover-bg"] = "var(--bambi-primary-600)";
+  tokens["--bambi-intent-danger-bg"] = "var(--bambi-danger)";
+  tokens["--bambi-intent-danger-fg"] = "var(--bambi-danger-foreground)";
+  tokens["--bambi-intent-danger-hover-bg"] = "var(--bambi-danger-600)";
+  tokens["--bambi-intent-success-bg"] = "var(--bambi-success)";
+  tokens["--bambi-intent-success-fg"] = "var(--bambi-success-foreground)";
+  tokens["--bambi-intent-success-hover-bg"] = "var(--bambi-success-600)";
+  tokens["--bambi-intent-warning-bg"] = "var(--bambi-warning)";
+  tokens["--bambi-intent-warning-fg"] = "var(--bambi-warning-foreground)";
+  tokens["--bambi-intent-warning-hover-bg"] = "var(--bambi-warning-600)";
+
   return tokens;
 }
 
@@ -227,11 +257,32 @@ export const DEFAULT_GENERATOR_HUE = 271;
 export const DEFAULT_GENERATOR_CHROMA = 0.22;
 export const DEFAULT_BASE_SLIDER_VALUE = 46;
 
+export function parseOklchColor(
+  value: string,
+): { hue: number; chroma: number } | null {
+  const match = value
+    .trim()
+    .match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)(?:deg)?/i);
+  if (!match?.[1] || !match[2] || !match[3]) return null;
+
+  const chroma = Number.parseFloat(match[2]);
+  const hue = Number.parseFloat(match[3]);
+  if (![chroma, hue].every(Number.isFinite)) return null;
+
+  return { hue: ((hue % 360) + 360) % 360, chroma };
+}
+
+export function parseGeneratorColorInput(
+  value: string,
+): { hue: number; chroma: number } | null {
+  return hexToOklch(value) ?? parseOklchColor(value);
+}
+
 export function createThemeFromBaseColor(
-  hexColor: string,
+  colorInput: string,
   base = DEFAULT_BASE_SLIDER_VALUE,
 ): TokenOverrides {
-  const color = hexToOklch(hexColor) ?? {
+  const color = parseGeneratorColorInput(colorInput) ?? {
     hue: DEFAULT_GENERATOR_HUE,
     chroma: DEFAULT_GENERATOR_CHROMA,
   };
@@ -239,32 +290,14 @@ export function createThemeFromBaseColor(
 }
 
 export function createDarkThemeFromBaseColor(
-  hexColor: string,
+  colorInput: string,
   base = DEFAULT_BASE_SLIDER_VALUE,
 ): TokenOverrides {
-  return {
-    ...createThemeFromBaseColor(hexColor, base),
-    "--bambi-background": "var(--bambi-neutral-950)",
-    "--bambi-foreground": "var(--bambi-neutral-50)",
-    "--bambi-card": "var(--bambi-neutral-900)",
-    "--bambi-card-foreground": "var(--bambi-neutral-50)",
-    "--bambi-popover": "var(--bambi-neutral-900)",
-    "--bambi-popover-foreground": "var(--bambi-neutral-50)",
-    "--bambi-secondary": "var(--bambi-neutral-800)",
-    "--bambi-secondary-foreground": "var(--bambi-neutral-50)",
-    "--bambi-accent": "var(--bambi-neutral-800)",
-    "--bambi-accent-foreground": "var(--bambi-neutral-50)",
-    "--bambi-muted": "var(--bambi-neutral-800)",
-    "--bambi-muted-foreground": "var(--bambi-neutral-400)",
-    "--bambi-border": "var(--bambi-neutral-800)",
-    "--bambi-input": "var(--bambi-neutral-700)",
-    "--bambi-input-background": "var(--bambi-neutral-900)",
-    "--bambi-input-foreground": "var(--bambi-neutral-50)",
-    "--bambi-input-placeholder": "var(--bambi-neutral-400)",
-    "--bambi-separator": "var(--bambi-neutral-800)",
-  };
+  return createThemeFromBaseColor(colorInput, base);
 }
 
-export function isValidHexColor(value: string): boolean {
-  return hexToOklch(value) !== null;
+export function isValidGeneratorColorInput(value: string): boolean {
+  return parseGeneratorColorInput(value) !== null;
 }
+
+export const isValidHexColor = isValidGeneratorColorInput;

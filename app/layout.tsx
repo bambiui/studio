@@ -13,8 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://studio.bambiui.com"),
   title: "BambiUI Studio",
   description: "Visual theme and component studio for BambiUI.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "BambiUI Studio",
+    description: "Visual theme and component studio for BambiUI.",
+    url: "https://studio.bambiui.com",
+    siteName: "BambiUI Studio",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
